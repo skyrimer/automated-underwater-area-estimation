@@ -1,0 +1,51 @@
+[project]
+name = "automated-underwater-area-estimation"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Kirill Chekmenev",email = "chekmenev2004@mail.ru"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "pandas (>=2.3.2,<3.0.0)",
+    "transformers (>=4.56.1,<5.0.0)",
+    "pillow (>=11.3.0,<12.0.0)",
+    "matplotlib (>=3.10.6,<4.0.0)",
+    "seaborn (>=0.13.2,<0.14.0)",
+    "scikit-learn (>=1.7.2,<2.0.0)",
+    "ultralytics (>=8.3.202,<9.0.0)",
+    "torch (>=2.8.0,<3.0.0)",
+    "torchvision (>=0.23.0,<0.24.0)",
+    "datasets (>=4.1.1,<5.0.0)"
+]
+
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.9.0"
+notebook = "^7.4.5"
+ipywidgets = "^8.1.7"
+pytest = "^8.4.2"
+
