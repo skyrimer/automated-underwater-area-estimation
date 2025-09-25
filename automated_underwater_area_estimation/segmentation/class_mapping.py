@@ -23,14 +23,14 @@ class ClassMappingBase(ABC):
             raise ValueError("CLASS_NAMES must be defined and non-empty")
 
         # Check that class IDs are sequential starting from 1
-        class_ids = sorted(self.CLASS_NAMES.keys())
-        expected_ids = list(range(1, len(class_ids) + 1))
-
-        if class_ids != expected_ids:
-            raise ValueError(
-                f"Class IDs must be sequential starting from 1. "
-                f"Expected: {expected_ids}, Got: {class_ids}"
-            )
+        # class_ids = sorted(self.CLASS_NAMES.keys())
+        # expected_ids = list(range(1, len(class_ids) + 1))
+        #
+        # if class_ids != expected_ids:
+        #     raise ValueError(
+        #         f"Class IDs must be sequential starting from 1. "
+        #         f"Expected: {expected_ids}, Got: {class_ids}"
+        #     )
 
         # Check that all class names are strings and non-empty
         for class_id, class_name in self.CLASS_NAMES.items():

@@ -5,7 +5,9 @@ from datasets import load_dataset
 from typing import Tuple
 
 from automated_underwater_area_estimation.segmentation.epfl.model import EPFLModel
-from automated_underwater_area_estimation.segmentation.reefsupport.model import ReefSupportModel
+from automated_underwater_area_estimation.segmentation.reefsupport.model import (
+    ReefSupportModel,
+)
 
 
 class TestSegmentationModels:
@@ -17,7 +19,9 @@ class TestSegmentationModels:
         # Load a sample image from CoralScapes dataset
         print("Loading CoralScapes dataset...")
         dataset = load_dataset("EPFL-ECEO/coralscapes", split="test")
-        cls.test_image = dataset[42]["image"]  # Use a specific index for reproducibility
+        cls.test_image = dataset[42][
+            "image"
+        ]  # Use a specific index for reproducibility
 
         # Ensure it's a PIL Image
         if not isinstance(cls.test_image, Image.Image):
@@ -28,15 +32,17 @@ class TestSegmentationModels:
         model = EPFLModel("EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024")
 
         # Check required attributes
-        assert hasattr(model, 'model_name')
-        assert hasattr(model, 'preprocessor')
-        assert hasattr(model, 'model')
-        assert hasattr(model, 'class_mapping')
-        assert hasattr(model, 'ideal_size')
-        assert hasattr(model, 'device')
+        assert hasattr(model, "model_name")
+        assert hasattr(model, "preprocessor")
+        assert hasattr(model, "model")
+        assert hasattr(model, "class_mapping")
+        assert hasattr(model, "ideal_size")
+        assert hasattr(model, "device")
 
         # Check specific values
-        assert model.model_name == "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024"
+        assert (
+            model.model_name == "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024"
+        )
         assert model.ideal_size == (1024, 1024)
         assert isinstance(model.device, torch.device)
 
@@ -45,15 +51,17 @@ class TestSegmentationModels:
         model = EPFLModel("EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024")
 
         # Check required attributes
-        assert hasattr(model, 'model_name')
-        assert hasattr(model, 'preprocessor')
-        assert hasattr(model, 'model')
-        assert hasattr(model, 'class_mapping')
-        assert hasattr(model, 'ideal_size')
-        assert hasattr(model, 'device')
+        assert hasattr(model, "model_name")
+        assert hasattr(model, "preprocessor")
+        assert hasattr(model, "model")
+        assert hasattr(model, "class_mapping")
+        assert hasattr(model, "ideal_size")
+        assert hasattr(model, "device")
 
         # Check specific values
-        assert model.model_name == "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024"
+        assert (
+            model.model_name == "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024"
+        )
         assert model.ideal_size == (1024, 1024)
         assert isinstance(model.device, torch.device)
 
@@ -62,12 +70,12 @@ class TestSegmentationModels:
         model = ReefSupportModel("yolov8_sm_latest.pt")
 
         # Check required attributes
-        assert hasattr(model, 'model_name')
-        assert hasattr(model, 'preprocessor')
-        assert hasattr(model, 'model')
-        assert hasattr(model, 'class_mapping')
-        assert hasattr(model, 'ideal_size')
-        assert hasattr(model, 'device')
+        assert hasattr(model, "model_name")
+        assert hasattr(model, "preprocessor")
+        assert hasattr(model, "model")
+        assert hasattr(model, "class_mapping")
+        assert hasattr(model, "ideal_size")
+        assert hasattr(model, "device")
 
         # Check specific values
         assert model.model_name == "yolov8_sm_latest.pt"
@@ -80,12 +88,12 @@ class TestSegmentationModels:
         model = ReefSupportModel("yolov8_xlarge_latest.pt")
 
         # Check required attributes
-        assert hasattr(model, 'model_name')
-        assert hasattr(model, 'preprocessor')
-        assert hasattr(model, 'model')
-        assert hasattr(model, 'class_mapping')
-        assert hasattr(model, 'ideal_size')
-        assert hasattr(model, 'device')
+        assert hasattr(model, "model_name")
+        assert hasattr(model, "preprocessor")
+        assert hasattr(model, "model")
+        assert hasattr(model, "class_mapping")
+        assert hasattr(model, "ideal_size")
+        assert hasattr(model, "device")
 
         # Check specific values
         assert model.model_name == "yolov8_xlarge_latest.pt"
@@ -159,7 +167,10 @@ class TestSegmentationModels:
 
         # Check processed image
         assert isinstance(processed_image, Image.Image)
-        assert processed_image.size == (640, 640)  # Should be resized to YOLO ideal size
+        assert processed_image.size == (
+            640,
+            640,
+        )  # Should be resized to YOLO ideal size
 
         # Check segmentation mask
         assert isinstance(segmentation_mask, torch.Tensor)
@@ -194,7 +205,9 @@ class TestSegmentationModels:
         """Test that models respect device specification."""
         # Test with CPU device
         cpu_device = torch.device("cpu")
-        model = EPFLModel("EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024", device=cpu_device)
+        model = EPFLModel(
+            "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024", device=cpu_device
+        )
 
         assert model.device == cpu_device
 
@@ -218,6 +231,7 @@ class TestSegmentationModels:
         assert reef_preprocessed is not None
         # Should return numpy array
         import numpy as np
+
         assert isinstance(reef_preprocessed, np.ndarray)
 
     def test_class_mapping_methods(self):
