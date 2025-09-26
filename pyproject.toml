@@ -21,6 +21,7 @@ dependencies = [
     "datasets (>=4.1.1,<5.0.0)",
     "protobuf (>=6.32.1,<7.0.0)",
     "google-cloud-storage (>=3.4.0,<4.0.0)",
+    "pycocotools (>=2.0.10,<3.0.0)",
 ]
 
 
@@ -62,5 +63,6 @@ exclude = '''
     | \.pytest_cache
     | __pycache__
     | automated_underwater_area_estimation/data
+    | automated_underwater_area_estimation/data_preprocessed
 )/
 '''

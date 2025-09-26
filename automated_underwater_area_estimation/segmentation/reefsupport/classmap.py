@@ -15,3 +15,7 @@ class ReefSupportClassMapping(ClassMappingBase):
         1: "hard coral",
         2: "soft coral",
     }
+    CORAL_CLASS_IDS: ClassVar[list[int]] = [
+        1,  # "hard coral"
+        2,  # "soft coral"
+    ]

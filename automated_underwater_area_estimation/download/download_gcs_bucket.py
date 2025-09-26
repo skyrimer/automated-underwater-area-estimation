@@ -42,19 +42,17 @@ def main():
     )
 
     parser.add_argument(
-        "--bucket_name", help="Name of the GCS bucket", default="rs_storage_open"
+        "--bucket_name", help="Name of the GCS bucket"
     )
 
     parser.add_argument(
         "--source_folder",
         help="Source folder path in the GCS bucket",
-        default="benthic_datasets/mask_labels/coralscop_masks",
     )
 
     parser.add_argument(
         "--destination",
         help="Local destination folder path",
-        default="./automated_underwater_area_estimation/data/coralscop_masks",
     )
 
     args = parser.parse_args()
@@ -63,7 +61,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # default: coralscop dataset
-    # folder = "benthic_datasets/mask_labels/coralscop_masks"
-    # also:
     main()

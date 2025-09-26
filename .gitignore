@@ -208,3 +208,4 @@ __marimo__/
 models/
 .idea
 data/
+data_preprocessed/

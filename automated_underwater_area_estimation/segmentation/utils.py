@@ -1,5 +1,7 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
-
+from PIL import Image
 
 def get_best_device(verbose: bool = False) -> torch.device:
     """
@@ -50,3 +52,50 @@ def get_best_device(verbose: bool = False) -> torch.device:
             print(f"  {info}")
 
     return device
+
+
+def plot_segmentation_results(image, segmentation_mask, title_prefix="Segmentation Results"):
+    """
+    Plot the original image, segmentation mask, and their overlay.
+
+    Args:
+        image (PIL.Image): Original image
+        segmentation_mask (torch.Tensor): Binary segmentation mask of same dimensions as image
+        title_prefix (str): Prefix for plot titles
+    """
+    # Convert inputs to numpy arrays for plotting
+    if isinstance(image, Image.Image):
+        img_array = np.array(image)
+    else:
+        img_array = image
+
+    # Convert mask to numpy array and ensure it's on CPU
+    if isinstance(segmentation_mask, torch.Tensor):
+        mask_array = segmentation_mask.cpu().numpy().astype(bool)
+    else:
+        mask_array = segmentation_mask.astype(bool)
+
+    # Create figure with 3 subplots
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Plot 1: Original image
+    axes[0].imshow(img_array)
+    axes[0].set_title(f"{title_prefix} - Original Image")
+    axes[0].axis('off')
+
+    # Plot 2: Segmentation mask
+    axes[1].imshow(mask_array, cmap='gray')
+    axes[1].set_title(f"{title_prefix} - Segmentation Mask")
+    axes[1].axis('off')
+
+    # Plot 3: Overlay with 50% opacity
+    axes[2].imshow(img_array)
+    # Create colored mask (red for detected regions)
+    colored_mask = np.zeros((*mask_array.shape, 4))  # RGBA
+    colored_mask[mask_array] = [1, 0, 0, 0.5]  # Red with 50% opacity
+    axes[2].imshow(colored_mask)
+    axes[2].set_title(f"{title_prefix} - Overlay (50% opacity)")
+    axes[2].axis('off')
+
+    plt.tight_layout()
+    plt.show()
