@@ -69,7 +69,7 @@ class EPFLModel(SegmentationModelBase):
         return resized_img
 
     def segment_image_sliding_window(
-            self, image: Image.Image, crop_size: Tuple[int, int] = None
+        self, image: Image.Image, crop_size: Tuple[int, int] = None
     ) -> Tuple[Image.Image, torch.Tensor]:
         """
         Segment a high-resolution image using sliding window approach.
@@ -102,22 +102,40 @@ class EPFLModel(SegmentationModelBase):
         h_grids = int(np.round(1.5 * h_img / h_crop)) if h_img > h_crop else 1
         w_grids = int(np.round(1.5 * w_img / w_crop)) if w_img > w_crop else 1
 
-        h_stride = int((h_img - h_crop + h_grids - 1) / (h_grids - 1)) if h_grids > 1 else h_crop
-        w_stride = int((w_img - w_crop + w_grids - 1) / (w_grids - 1)) if w_grids > 1 else w_crop
+        h_stride = (
+            int((h_img - h_crop + h_grids - 1) / (h_grids - 1))
+            if h_grids > 1
+            else h_crop
+        )
+        w_stride = (
+            int((w_img - w_crop + w_grids - 1) / (w_grids - 1))
+            if w_grids > 1
+            else w_crop
+        )
 
         # Get the actual number of classes from the model's output
         # Do a quick test inference to determine the correct number of classes
         with torch.no_grad():
-            test_crop = img[:, :, :min(h_crop, h_img), :min(w_crop, w_img)]
-            test_crop_array = test_crop.squeeze(0).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+            test_crop = img[:, :, : min(h_crop, h_img), : min(w_crop, w_img)]
+            test_crop_array = (
+                test_crop.squeeze(0).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+            )
             test_crop_pil = Image.fromarray(test_crop_array)
             test_inputs = self.preprocess(test_crop_pil)
             test_outputs = self.model(**test_inputs)
-            num_classes = test_outputs.logits.shape[1]  # Get actual number of classes from model output
+            num_classes = test_outputs.logits.shape[
+                1
+            ]  # Get actual number of classes from model output
 
         # Initialize prediction accumulator and count matrix
-        preds = torch.zeros((batch_size, num_classes, h_img, w_img), dtype=torch.float32, device=self.device)
-        count_mat = torch.zeros((batch_size, 1, h_img, w_img), dtype=torch.float32, device=self.device)
+        preds = torch.zeros(
+            (batch_size, num_classes, h_img, w_img),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        count_mat = torch.zeros(
+            (batch_size, 1, h_img, w_img), dtype=torch.float32, device=self.device
+        )
 
         # Process each window
         for h_idx in range(h_grids):
@@ -135,7 +153,13 @@ class EPFLModel(SegmentationModelBase):
                 with torch.no_grad():
                     # Convert crop tensor back to PIL for preprocessing
                     # crop_img shape: (1, 3, h_crop, w_crop)
-                    crop_array = crop_img.squeeze(0).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+                    crop_array = (
+                        crop_img.squeeze(0)
+                        .permute(1, 2, 0)
+                        .cpu()
+                        .numpy()
+                        .astype(np.uint8)
+                    )
                     crop_pil = Image.fromarray(crop_array)
 
                     # Preprocess the crop
@@ -144,7 +168,10 @@ class EPFLModel(SegmentationModelBase):
 
                 # Get logits and resize to crop size
                 resized_logits = F.interpolate(
-                    outputs.logits, size=crop_img.shape[-2:], mode="bilinear", align_corners=False
+                    outputs.logits,
+                    size=crop_img.shape[-2:],
+                    mode="bilinear",
+                    align_corners=False,
                 )
 
                 # Move logits to device before padding
@@ -153,7 +180,12 @@ class EPFLModel(SegmentationModelBase):
                 # Pad the logits to fit into the full image predictions
                 padded_logits = F.pad(
                     resized_logits,
-                    (int(x1), int(preds.shape[3] - x2), int(y1), int(preds.shape[2] - y2))
+                    (
+                        int(x1),
+                        int(preds.shape[3] - x2),
+                        int(y1),
+                        int(preds.shape[2] - y2),
+                    ),
                 )
 
                 preds += padded_logits
@@ -172,20 +204,25 @@ class EPFLModel(SegmentationModelBase):
         preds = F.interpolate(
             preds.unsqueeze(0).float(),
             size=image.size[::-1],  # PIL size is (width, height), need (height, width)
-            mode='nearest'
+            mode="nearest",
         )
 
         final_segments = preds.squeeze().long().to(self.device)
 
         # Convert to binary classification using class mapping
-        binary_mask = torch.zeros_like(final_segments, dtype=torch.bool, device=self.device)
+        binary_mask = torch.zeros_like(
+            final_segments, dtype=torch.bool, device=self.device
+        )
         for class_id in self.class_mapping.CORAL_CLASS_IDS:
             binary_mask = torch.logical_or(binary_mask, final_segments == class_id)
 
         return image, binary_mask
 
     def segment_image(
-            self, image: Image.Image, adjust_size: bool = True, use_sliding_window: bool = False
+        self,
+        image: Image.Image,
+        adjust_size: bool = True,
+        use_sliding_window: bool = False,
     ) -> Tuple[Image.Image, torch.Tensor]:
         """
         Segment an image using the EPFL model with binary classification.

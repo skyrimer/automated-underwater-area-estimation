@@ -235,13 +235,21 @@ class EvaluationPipeline:
             try:
                 # Get data
                 image, gt_mask = dataset[idx]
-                pred_image, pred_mask = model.segment_image(image, adjust_size=False, use_sliding_window=True)
+                pred_image, pred_mask = model.segment_image(
+                    image, adjust_size=False, use_sliding_window=True
+                )
                 if gt_mask.shape != pred_mask.shape:
-                    gt_mask = F.interpolate(
-                        gt_mask.unsqueeze(0).unsqueeze(0).float(),  # Add batch and channel dims, convert to float
-                        size=pred_mask.shape,  # Match the prediction mask dimensions
-                        mode='nearest'
-                    ).squeeze().bool()
+                    gt_mask = (
+                        F.interpolate(
+                            gt_mask.unsqueeze(0)
+                            .unsqueeze(0)
+                            .float(),  # Add batch and channel dims, convert to float
+                            size=pred_mask.shape,  # Match the prediction mask dimensions
+                            mode="nearest",
+                        )
+                        .squeeze()
+                        .bool()
+                    )
                 # Run inference
                 # pred_image, pred_mask = model.segment_image(image, adjust_size=True)
                 # target_height, target_width = pred_image.size
@@ -250,9 +258,6 @@ class EvaluationPipeline:
                 #     size=(target_height, target_width),  # Note: interpolate expects (height, width)
                 #     mode='nearest'
                 # ).squeeze().bool()
-
-
-
 
                 # Compute metrics
                 metrics = compute_segmentation_metrics(
