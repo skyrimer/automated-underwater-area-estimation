@@ -52,9 +52,9 @@ class EPFLClassMapping(ClassMappingBase):
     }
     # List of class IDs that represent coral (any kind - alive, dead, or bleached)
     CORAL_CLASS_IDS: ClassVar[list[int]] = [
-        3,   # "other coral dead"
-        4,   # "other coral bleached"
-        6,   # "other coral alive"
+        3,  # "other coral dead"
+        4,  # "other coral bleached"
+        6,  # "other coral alive"
         16,  # "massive/meandering bleached"
         17,  # "massive/meandering alive"
         19,  # "branching bleached"

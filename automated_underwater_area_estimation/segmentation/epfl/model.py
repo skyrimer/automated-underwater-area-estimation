@@ -50,7 +50,7 @@ class EPFLModel(SegmentationModelBase):
         super().__init__(self.device)
 
     def segment_image(
-            self, image: Image.Image, adjust_size: bool = True
+        self, image: Image.Image, adjust_size: bool = True
     ) -> Tuple[Image.Image, torch.Tensor]:
         """Segment an image using the EPFL model with binary classification."""
         if adjust_size:

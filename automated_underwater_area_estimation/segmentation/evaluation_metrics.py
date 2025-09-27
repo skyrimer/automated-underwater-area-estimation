@@ -2,18 +2,19 @@ import torch
 from typing import Dict, Union
 
 
-def _prepare_masks(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device) -> tuple[
-    torch.Tensor, torch.Tensor]:
+def _prepare_masks(
+    pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device
+) -> tuple[torch.Tensor, torch.Tensor]:
     """Helper function to prepare masks for computation."""
     return pred_mask.bool().to(device), gt_mask.bool().to(device)
 
 
 def compute_segmentation_metrics(
-        pred_mask: torch.Tensor,
-        gt_mask: torch.Tensor,
-        device: torch.device,
-        smooth: float = 1e-6,
-        metrics: Union[str, list[str]] = "all"
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+    metrics: Union[str, list[str]] = "all",
 ) -> Union[float, Dict[str, float]]:
     """
     Compute segmentation metrics for binary masks efficiently.
@@ -37,12 +38,16 @@ def compute_segmentation_metrics(
         elif metrics in available_metrics:
             requested_metrics = {metrics}
         else:
-            raise ValueError(f"Invalid metric '{metrics}'. Available: {available_metrics}")
+            raise ValueError(
+                f"Invalid metric '{metrics}'. Available: {available_metrics}"
+            )
     elif isinstance(metrics, list):
         requested_metrics = set(metrics)
         invalid = requested_metrics - available_metrics
         if invalid:
-            raise ValueError(f"Invalid metrics {invalid}. Available: {available_metrics}")
+            raise ValueError(
+                f"Invalid metrics {invalid}. Available: {available_metrics}"
+            )
     else:
         raise ValueError("metrics must be 'all', a string, or a list of strings")
 
@@ -85,33 +90,60 @@ def compute_segmentation_metrics(
 
 
 # Convenience functions for backward compatibility and specific use cases
-def compute_dice(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device, smooth: float = 1e-6) -> float:
+def compute_dice(
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+) -> float:
     """Compute Dice coefficient (F1-score) for binary masks."""
     return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "dice")
 
 
-def compute_iou(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device, smooth: float = 1e-6) -> float:
+def compute_iou(
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+) -> float:
     """Compute Intersection over Union (IoU) for binary masks."""
     return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "iou")
 
 
-def compute_precision(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device,
-                      smooth: float = 1e-6) -> float:
+def compute_precision(
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+) -> float:
     """Compute Precision for binary masks."""
     return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "precision")
 
 
-def compute_recall(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device, smooth: float = 1e-6) -> float:
+def compute_recall(
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+) -> float:
     """Compute Recall (Sensitivity) for binary masks."""
     return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "recall")
 
 
-def compute_pixel_accuracy(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device) -> float:
+def compute_pixel_accuracy(
+    pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device
+) -> float:
     """Compute Pixel Accuracy for binary masks."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, metrics="pixel_accuracy")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, metrics="pixel_accuracy"
+    )
 
 
-def compute_all_metrics(pred_mask: torch.Tensor, gt_mask: torch.Tensor, device: torch.device, smooth: float = 1e-6) -> \
-Dict[str, float]:
+def compute_all_metrics(
+    pred_mask: torch.Tensor,
+    gt_mask: torch.Tensor,
+    device: torch.device,
+    smooth: float = 1e-6,
+) -> Dict[str, float]:
     """Compute all segmentation metrics at once for efficiency."""
     return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "all")

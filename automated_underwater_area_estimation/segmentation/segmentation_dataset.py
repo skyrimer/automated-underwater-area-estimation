@@ -28,8 +28,8 @@ class CoralSegmentationDataset(Dataset):
             return_filename: Whether to return filenames along with data
         """
         self.data_root = Path(data_root)
-        self.images_dir = self.data_root / 'images'
-        self.masks_dir = self.data_root / 'masks'
+        self.images_dir = self.data_root / "images"
+        self.masks_dir = self.data_root / "masks"
 
         # Validate directories exist
         if not self.images_dir.exists():
@@ -48,14 +48,14 @@ class CoralSegmentationDataset(Dataset):
         samples = []
 
         # Get all mask files
-        mask_files = list(self.masks_dir.glob('*.npy'))
+        mask_files = list(self.masks_dir.glob("*.npy"))
 
         for mask_file in mask_files:
             base_name = mask_file.stem  # filename without extension
 
             # Find corresponding image file
             image_file = None
-            for ext in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']:
+            for ext in [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]:
                 potential_image = self.images_dir / (base_name + ext)
                 if potential_image.exists():
                     image_file = potential_image
@@ -64,7 +64,9 @@ class CoralSegmentationDataset(Dataset):
             if image_file is not None:
                 samples.append((image_file, mask_file))
             else:
-                print(f"Warning: No corresponding image found for mask {mask_file.name}")
+                print(
+                    f"Warning: No corresponding image found for mask {mask_file.name}"
+                )
 
         return sorted(samples)  # Sort for consistent ordering
 
@@ -86,12 +88,14 @@ class CoralSegmentationDataset(Dataset):
             - filename: Original image filename (optional)
         """
         if idx >= len(self.samples):
-            raise IndexError(f"Index {idx} out of range for dataset of size {len(self.samples)}")
+            raise IndexError(
+                f"Index {idx} out of range for dataset of size {len(self.samples)}"
+            )
 
         image_path, mask_path = self.samples[idx]
 
         # Load image as PIL Image
-        image = Image.open(image_path).convert('RGB')
+        image = Image.open(image_path).convert("RGB")
 
         # Load mask as numpy array and convert to boolean tensor
         mask_array = np.load(mask_path)
@@ -118,22 +122,21 @@ class CoralSegmentationDataset(Dataset):
 
         # Original image
         axes[0].imshow(image)
-        axes[0].set_title('Original Image')
-        axes[0].axis('off')
+        axes[0].set_title("Original Image")
+        axes[0].axis("off")
 
         # Mask
-        axes[1].imshow(mask, cmap='gray')
-        axes[1].set_title('Segmentation Mask')
-        axes[1].axis('off')
+        axes[1].imshow(mask, cmap="gray")
+        axes[1].set_title("Segmentation Mask")
+        axes[1].axis("off")
 
         # Overlay
         overlay = np.array(image)
         mask_np = mask.numpy()
         overlay[mask_np == 1] = [255, 0, 0]  # Red overlay for mask areas
         axes[2].imshow(overlay)
-        axes[2].set_title('Overlay')
-        axes[2].axis('off')
-
+        axes[2].set_title("Overlay")
+        axes[2].axis("off")
 
         plt.tight_layout()
         plt.show()

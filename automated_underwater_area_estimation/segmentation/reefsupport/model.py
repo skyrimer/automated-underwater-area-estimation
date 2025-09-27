@@ -73,11 +73,13 @@ class ReefSupportModel(SegmentationModelBase):
         return str(model_path)
 
     def segment_image(
-            self, image: Image.Image, adjust_size: bool = True
+        self, image: Image.Image, adjust_size: bool = True
     ) -> Tuple[Image.Image, torch.Tensor]:
         """Segment an image using the ReefSupport YOLO model with binary classification."""
         if adjust_size:
-            image = image.resize(self.ideal_size, )
+            image = image.resize(
+                self.ideal_size,
+            )
 
         # Convert PIL to numpy array for YOLO
         image_array = self.preprocess(image)
@@ -87,9 +89,9 @@ class ReefSupportModel(SegmentationModelBase):
 
         # Extract segmentation masks
         if (
-                len(results) > 0
-                and hasattr(results[0], "masks")
-                and results[0].masks is not None
+            len(results) > 0
+            and hasattr(results[0], "masks")
+            and results[0].masks is not None
         ):
             # Get the first result's masks
             masks = results[
@@ -98,7 +100,7 @@ class ReefSupportModel(SegmentationModelBase):
 
             if len(masks) > 0:
                 # Create binary segmentation map (True/False)
-                image_width, image_height  = image.size
+                image_width, image_height = image.size
                 segmentation_map = torch.zeros(
                     (image_height, image_width), dtype=torch.bool, device=self.device
                 )
@@ -106,7 +108,7 @@ class ReefSupportModel(SegmentationModelBase):
                 for i, mask in enumerate(masks):
                     # Get class ID for this detection
                     class_id = (
-                            int(results[0].boxes.cls[i].item()) + 1
+                        int(results[0].boxes.cls[i].item()) + 1
                     )  # +1 because our mapping starts at 1
 
                     # Use class mapping to check if this is a coral class
@@ -122,7 +124,9 @@ class ReefSupportModel(SegmentationModelBase):
                             .bool()
                         )
                         # Set True for coral pixels (binary OR operation)
-                        segmentation_map = torch.logical_or(segmentation_map, mask_resized)
+                        segmentation_map = torch.logical_or(
+                            segmentation_map, mask_resized
+                        )
 
                 return image, segmentation_map
             else:

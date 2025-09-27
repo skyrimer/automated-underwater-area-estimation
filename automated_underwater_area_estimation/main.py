@@ -1,7 +1,11 @@
-from automated_underwater_area_estimation.download.download_gcs_bucket import download_gcs_folder
-from automated_underwater_area_estimation.preprocess_data.preprocess_segmentation_validation import save_image_mask_pairs
+from automated_underwater_area_estimation.download.download_gcs_bucket import (
+    download_gcs_folder,
+)
+from automated_underwater_area_estimation.preprocess_data.preprocess_segmentation_validation import (
+    save_image_mask_pairs,
+)
 
-package_name = 'automated_underwater_area_estimation'
+package_name = "automated_underwater_area_estimation"
 bucket = "rs_storage_open"
 gcs_folders = [
     ("coralscop_masks", "mask_labels"),
@@ -11,7 +15,7 @@ for gcs_folder in gcs_folders:
     download_gcs_folder(
         bucket,
         source_folder=f"benthic_datasets/{gcs_folder[1]}/{gcs_folder[0]}/",
-        destination_folder=f"./{package_name}/data/{gcs_folder[0]}"
+        destination_folder=f"./{package_name}/data/{gcs_folder[0]}",
     )
 
 split = "test"

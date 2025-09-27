@@ -3,17 +3,21 @@ import numpy as np
 import torch
 from PIL import Image
 
-def get_best_device(verbose: bool = False) -> torch.device:
+
+def get_best_device(verbose: bool = False, force_device: str = "") -> torch.device:
     """
     Get the best available device for PyTorch operations.
     Priority order: CUDA > MPS > XPU > CPU
 
     Args:
         verbose: If True, print information about the selected device
+        force_device: If provided, force the use of the specified device
 
     Returns:
         torch.device: The best available device
     """
+    if force_device:
+        return torch.device(force_device)
     device_info = []
 
     # Check for CUDA (NVIDIA GPUs)
@@ -54,7 +58,9 @@ def get_best_device(verbose: bool = False) -> torch.device:
     return device
 
 
-def plot_segmentation_results(image, segmentation_mask, title_prefix="Segmentation Results"):
+def plot_segmentation_results(
+    image, segmentation_mask, title_prefix="Segmentation Results"
+):
     """
     Plot the original image, segmentation mask, and their overlay.
 
@@ -81,12 +87,12 @@ def plot_segmentation_results(image, segmentation_mask, title_prefix="Segmentati
     # Plot 1: Original image
     axes[0].imshow(img_array)
     axes[0].set_title(f"{title_prefix} - Original Image")
-    axes[0].axis('off')
+    axes[0].axis("off")
 
     # Plot 2: Segmentation mask
-    axes[1].imshow(mask_array, cmap='gray')
+    axes[1].imshow(mask_array, cmap="gray")
     axes[1].set_title(f"{title_prefix} - Segmentation Mask")
-    axes[1].axis('off')
+    axes[1].axis("off")
 
     # Plot 3: Overlay with 50% opacity
     axes[2].imshow(img_array)
@@ -95,7 +101,7 @@ def plot_segmentation_results(image, segmentation_mask, title_prefix="Segmentati
     colored_mask[mask_array] = [1, 0, 0, 0.5]  # Red with 50% opacity
     axes[2].imshow(colored_mask)
     axes[2].set_title(f"{title_prefix} - Overlay (50% opacity)")
-    axes[2].axis('off')
+    axes[2].axis("off")
 
     plt.tight_layout()
     plt.show()

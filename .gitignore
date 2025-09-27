@@ -209,3 +209,4 @@ models/
 .idea
 data/
 data_preprocessed/
+evaluation_results/

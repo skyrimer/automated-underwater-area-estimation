@@ -41,9 +41,7 @@ def main():
         description="Download files from a GCS bucket folder to local directory"
     )
 
-    parser.add_argument(
-        "--bucket_name", help="Name of the GCS bucket"
-    )
+    parser.add_argument("--bucket_name", help="Name of the GCS bucket")
 
     parser.add_argument(
         "--source_folder",
