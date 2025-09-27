@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import torch
-
+import torch.nn.functional as F
 from automated_underwater_area_estimation.segmentation.reefsupport.model import (
     ReefSupportModel,
 )
@@ -77,8 +77,8 @@ class EvaluationPipeline:
         metrics_dir.mkdir(parents=True, exist_ok=True)
 
         # Save prediction mask
-        mask_path = masks_dir / f"image_{idx:04d}_prediction.npy"
-        np.save(mask_path, pred_mask.cpu().numpy())
+        # mask_path = masks_dir / f"image_{idx:04d}_prediction.npy"
+        # np.save(mask_path, pred_mask.cpu().numpy())
 
         # Save individual metrics
         result = {
@@ -235,9 +235,24 @@ class EvaluationPipeline:
             try:
                 # Get data
                 image, gt_mask = dataset[idx]
-
+                pred_image, pred_mask = model.segment_image(image, adjust_size=False, use_sliding_window=True)
+                if gt_mask.shape != pred_mask.shape:
+                    gt_mask = F.interpolate(
+                        gt_mask.unsqueeze(0).unsqueeze(0).float(),  # Add batch and channel dims, convert to float
+                        size=pred_mask.shape,  # Match the prediction mask dimensions
+                        mode='nearest'
+                    ).squeeze().bool()
                 # Run inference
-                pred_image, pred_mask = model.segment_image(image, adjust_size=False)
+                # pred_image, pred_mask = model.segment_image(image, adjust_size=True)
+                # target_height, target_width = pred_image.size
+                # gt_mask = F.interpolate(
+                #     gt_mask.unsqueeze(0).unsqueeze(0).float(),  # Add batch and channel dims, convert to float
+                #     size=(target_height, target_width),  # Note: interpolate expects (height, width)
+                #     mode='nearest'
+                # ).squeeze().bool()
+
+
+
 
                 # Compute metrics
                 metrics = compute_segmentation_metrics(
@@ -258,15 +273,15 @@ class EvaluationPipeline:
                 all_metrics.append(metrics)
 
                 # Save sample images
-                if idx % save_images_every == 0 or idx < 10:
-                    viz_path = images_dir / f"image_{idx:04d}_visualization.png"
-                    self.create_visualization(
-                        image,
-                        gt_mask,
-                        pred_mask,
-                        f"{model_name} - {dataset_name} - Image {idx}",
-                        save_path=viz_path,
-                    )
+                # if idx % save_images_every == 0 or idx < 10:
+                #     viz_path = images_dir / f"image_{idx:04d}_visualization.png"
+                #     self.create_visualization(
+                #         image,
+                #         gt_mask,
+                #         pred_mask,
+                #         f"{model_name} - {dataset_name} - Image {idx}",
+                #         save_path=viz_path,
+                #     )
 
             except Exception as e:
                 print(f"Error processing image {idx} for {model_name}: {e}")
