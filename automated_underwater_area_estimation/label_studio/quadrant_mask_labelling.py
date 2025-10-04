@@ -34,7 +34,7 @@ base_path = "./automated_underwater_area_estimation/"
 IMAGES_DIR = Path(base_path + "data_preprocessed/IBF/images")
 MASKS_DIR = Path(base_path + "data_preprocessed/IBF/masks")
 CLICKS_DIR = Path(base_path + "data_preprocessed/IBF/clicks")
-CHECKPOINT_PATH = base_path + "label_studio//sam_vit_b_01ec64.pth"  # AquaSAM checkpoint
+CHECKPOINT_PATH = base_path + "label_studio//aquasam_weights.pth"  # AquaSAM checkpoint
 SAM_VARIANT = "vit_b"  # AquaSAM is ViT-B
 TARGET_SIZE = 1024
 SAVE_SIZE = (4000, 3000)  # Width x Height for saved masks
@@ -122,7 +122,7 @@ def get_unlabeled_images():
     # Check which images already have masks
     labeled = set()
     for img_path in all_images:
-        mask_path = MASKS_DIR / f"{img_path.stem}_mask.pt"
+        mask_path = MASKS_DIR / f"{img_path.stem}.pt"
         if mask_path.exists():
             labeled.add(img_path)
 
