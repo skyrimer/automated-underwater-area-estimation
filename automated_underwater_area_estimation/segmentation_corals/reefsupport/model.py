@@ -2,13 +2,13 @@ from typing import Tuple, List, Literal, Any
 from PIL import Image
 import torch
 import numpy as np
-from automated_underwater_area_estimation.segmentation.model import (
+from automated_underwater_area_estimation.segmentation_corals.model import (
     SegmentationModelBase,
 )
-from automated_underwater_area_estimation.segmentation.reefsupport.classmap import (
+from automated_underwater_area_estimation.segmentation_corals.reefsupport.classmap import (
     ReefSupportClassMapping,
 )
-from automated_underwater_area_estimation.segmentation.utils import get_best_device
+from automated_underwater_area_estimation.segmentation_corals.utils import get_best_device
 from ultralytics import YOLO
 from pathlib import Path
 

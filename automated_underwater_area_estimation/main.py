@@ -7,16 +7,16 @@ from automated_underwater_area_estimation.preprocess_data.preprocess_segmentatio
 
 package_name = "automated_underwater_area_estimation"
 bucket = "rs_storage_open"
-# gcs_folders = [
-#     ("coralscop_masks", "mask_labels"),
-#     ("IBF", "point_labels"),
-# ]
-# for gcs_folder in gcs_folders:
-#     download_gcs_folder(
-#         bucket,
-#         source_folder=f"benthic_datasets/{gcs_folder[1]}/{gcs_folder[0]}/",
-#         destination_folder=f"./{package_name}/data/{gcs_folder[0]}",
-#     )
+gcs_folders = [
+    ("coralscop_masks", "mask_labels"),
+    ("IBF", "point_labels"),
+]
+for gcs_folder in gcs_folders:
+    download_gcs_folder(
+        bucket,
+        source_folder=f"benthic_datasets/{gcs_folder[1]}/{gcs_folder[0]}/",
+        destination_folder=f"./{package_name}/data/{gcs_folder[0]}",
+    )
 
 for split in ["train"]:
     source_json_path = f"./{package_name}/data/coralscop_masks/{split}/jsons/"

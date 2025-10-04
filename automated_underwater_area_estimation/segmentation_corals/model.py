@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Any
 from PIL import Image
 import torch
-from automated_underwater_area_estimation.segmentation.class_mapping import (
+from automated_underwater_area_estimation.segmentation_corals.class_mapping import (
     ClassMappingBase,
 )
 

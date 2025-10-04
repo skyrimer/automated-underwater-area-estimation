@@ -1,6 +1,6 @@
 from typing import Dict, ClassVar
 from dataclasses import dataclass
-from automated_underwater_area_estimation.segmentation.class_mapping import (
+from automated_underwater_area_estimation.segmentation_corals.class_mapping import (
     ClassMappingBase,
 )
 

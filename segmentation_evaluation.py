@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import torch
 import torch.nn.functional as F
-from automated_underwater_area_estimation.segmentation.reefsupport.model import (
+from automated_underwater_area_estimation.segmentation_corals.reefsupport.model import (
     ReefSupportModel,
 )
-from automated_underwater_area_estimation.segmentation.epfl.model import EPFLModel
-from automated_underwater_area_estimation.segmentation.segmentation_dataset import (
+from automated_underwater_area_estimation.segmentation_corals.epfl.model import EPFLModel
+from automated_underwater_area_estimation.segmentation_corals.segmentation_dataset import (
     CoralSegmentationDataset,
 )
-from automated_underwater_area_estimation.segmentation.evaluation_metrics import (
+from automated_underwater_area_estimation.segmentation_corals.evaluation_metrics import (
     compute_segmentation_metrics,
 )
 

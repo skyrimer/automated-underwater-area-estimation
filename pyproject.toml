@@ -51,6 +51,9 @@ black = "^25.9.0"
 notebook = "^7.4.5"
 ipywidgets = "^8.1.7"
 pytest = "^8.4.2"
+streamlit = "^1.50.0"
+streamlit-image-coordinates = "^0.4.0"
+segment-anything = "^1.0"
 
 [tool.black]
 exclude = '''

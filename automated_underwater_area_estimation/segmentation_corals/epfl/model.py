@@ -2,13 +2,13 @@ from typing import Literal, Tuple
 from transformers import SegformerImageProcessor, SegformerForSemanticSegmentation
 from transformers.image_processing_base import BatchFeature
 
-from automated_underwater_area_estimation.segmentation.epfl.classmap import (
+from automated_underwater_area_estimation.segmentation_corals.epfl.classmap import (
     EPFLClassMapping,
 )
-from automated_underwater_area_estimation.segmentation.model import (
+from automated_underwater_area_estimation.segmentation_corals.model import (
     SegmentationModelBase,
 )
-from automated_underwater_area_estimation.segmentation.utils import get_best_device
+from automated_underwater_area_estimation.segmentation_corals.utils import get_best_device
 import torch
 from PIL import Image
 import numpy as np
