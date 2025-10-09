@@ -1,3 +1,4 @@
+import itertools
 from typing import Tuple, List, Literal, Any
 from PIL import Image
 import torch
@@ -8,7 +9,9 @@ from automated_underwater_area_estimation.segmentation_corals.model import (
 from automated_underwater_area_estimation.segmentation_corals.reefsupport.classmap import (
     ReefSupportClassMapping,
 )
-from automated_underwater_area_estimation.segmentation_corals.utils import get_best_device
+from automated_underwater_area_estimation.segmentation_corals.utils import (
+    get_best_device,
+)
 from ultralytics import YOLO
 from pathlib import Path
 
@@ -52,7 +55,7 @@ class ReefSupportModel(SegmentationModelBase):
 
         # Get the directory where the model.py file is located
         current_file_dir = Path(__file__).parent
-        model_dir = current_file_dir / "models"
+        model_dir = current_file_dir / "checkpoints"
 
         # Create models directory if it doesn't exist
         model_dir.mkdir(exist_ok=True)
@@ -81,11 +84,10 @@ class ReefSupportModel(SegmentationModelBase):
             new_w, new_h = target_size, int(h_img * (target_size / w_img))
         else:
             new_w, new_h = int(w_img * (target_size / h_img)), target_size
-        resized_img = image.resize((new_w, new_h))
-        return resized_img
+        return image.resize((new_w, new_h))
 
     def segment_image_sliding_window(
-        self, image: Image.Image, crop_size: Tuple[int, int] = None
+        self, image: Image.Image
     ) -> Tuple[Image.Image, torch.Tensor]:
         """
         Segment a high-resolution image using sliding window approach.
@@ -93,14 +95,11 @@ class ReefSupportModel(SegmentationModelBase):
 
         Args:
             image: Input PIL image
-            crop_size: Size of each window (height, width). Defaults to ideal_size reversed.
 
         Returns:
             Tuple of (original_image, segmentation_map)
         """
-        if crop_size is None:
-            # Convert from PIL format (width, height) to tensor format (height, width)
-            crop_size = (self.ideal_size[1], self.ideal_size[0])
+        crop_size = (self.ideal_size[1], self.ideal_size[0])
 
         h_crop, w_crop = crop_size  # Tensor format: (height, width)
 
@@ -138,90 +137,89 @@ class ReefSupportModel(SegmentationModelBase):
         )
 
         # Process each window
-        for h_idx in range(h_grids):
-            for w_idx in range(w_grids):
-                y1 = h_idx * h_stride
-                x1 = w_idx * w_stride
-                y2 = min(y1 + h_crop, h_img)
-                x2 = min(x1 + w_crop, w_img)
-                y1 = max(y2 - h_crop, 0)
-                x1 = max(x2 - w_crop, 0)
+        for h_idx, w_idx in itertools.product(range(h_grids), range(w_grids)):
+            y1 = h_idx * h_stride
+            x1 = w_idx * w_stride
+            y2 = min(y1 + h_crop, h_img)
+            x2 = min(x1 + w_crop, w_img)
+            y1 = max(y2 - h_crop, 0)
+            x1 = max(x2 - w_crop, 0)
 
-                # Extract crop
-                crop_img = img[:, :, y1:y2, x1:x2]
+            # Extract crop
+            crop_img = img[:, :, y1:y2, x1:x2]
 
-                with torch.no_grad():
-                    # Convert crop tensor back to PIL for YOLO processing
-                    crop_array = (
-                        crop_img.squeeze(0)
-                        .permute(1, 2, 0)
-                        .cpu()
-                        .numpy()
-                        .astype(np.uint8)
-                    )
-                    crop_pil = Image.fromarray(crop_array)
-
-                    # Resize to ideal size for YOLO inference
-                    crop_resized = crop_pil.resize(self.ideal_size)
-                    crop_processed = self.preprocess(crop_resized)
-
-                    # Run YOLO inference
-                    results = self.model(crop_processed)
-
-                # Process YOLO results to create binary mask for this crop
-                crop_binary_mask = torch.zeros(
-                    crop_img.shape[-2:], dtype=torch.float32, device=self.device
+            with torch.no_grad():
+                # Convert crop tensor back to PIL for YOLO processing
+                crop_array = (
+                    crop_img.squeeze(0)
+                    .permute(1, 2, 0)
+                    .cpu()
+                    .numpy()
+                    .astype(np.uint8)
                 )
+                crop_pil = Image.fromarray(crop_array)
 
-                if (
-                    len(results) > 0
-                    and hasattr(results[0], "masks")
-                    and results[0].masks is not None
-                ):
-                    masks = results[0].masks.data
+                # Resize to ideal size for YOLO inference
+                crop_resized = crop_pil.resize(self.ideal_size)
+                crop_processed = self.preprocess(crop_resized)
 
-                    if len(masks) > 0:
-                        for i, mask in enumerate(masks):
-                            # Get class ID for this detection
-                            class_id = int(results[0].boxes.cls[i].item()) + 1
+                # Run YOLO inference
+                results = self.model(crop_processed)
 
-                            # Check if this is a coral class
-                            if class_id in self.class_mapping.CORAL_CLASS_IDS:
-                                # Resize mask to crop size and move to device
-                                mask_resized = (
-                                    torch.nn.functional.interpolate(
-                                        mask.unsqueeze(0).unsqueeze(0).float(),
-                                        size=crop_img.shape[-2:],
-                                        mode="nearest",
-                                    )
-                                    .squeeze()
-                                    .float()
-                                    .to(self.device)
+            # Process YOLO results to create binary mask for this crop
+            crop_binary_mask = torch.zeros(
+                crop_img.shape[-2:], dtype=torch.float32, device=self.device
+            )
+
+            if (
+                len(results) > 0
+                and hasattr(results[0], "masks")
+                and results[0].masks is not None
+            ):
+                masks = results[0].masks.data
+
+                if len(masks) > 0:
+                    for i, mask in enumerate(masks):
+                        # Get class ID for this detection
+                        class_id = int(results[0].boxes.cls[i].item()) + 1
+
+                        # Check if this is a coral class
+                        if class_id in self.class_mapping.CORAL_CLASS_IDS:
+                            # Resize mask to crop size and move to device
+                            mask_resized = (
+                                torch.nn.functional.interpolate(
+                                    mask.unsqueeze(0).unsqueeze(0).float(),
+                                    size=crop_img.shape[-2:],
+                                    mode="nearest",
                                 )
+                                .squeeze()
+                                .float()
+                                .to(self.device)
+                            )
 
-                                # Accumulate coral predictions (using max for overlapping detections)
-                                crop_binary_mask = torch.maximum(
-                                    crop_binary_mask, mask_resized
-                                )
+                            # Accumulate coral predictions (using max for overlapping detections)
+                            crop_binary_mask = torch.maximum(
+                                crop_binary_mask, mask_resized
+                            )
 
-                # Add crop prediction to global prediction map using padding
-                crop_binary_mask_batch = crop_binary_mask.unsqueeze(0).unsqueeze(
-                    0
-                )  # Add batch and channel dims
+            # Add crop prediction to global prediction map using padding
+            crop_binary_mask_batch = crop_binary_mask.unsqueeze(0).unsqueeze(
+                0
+            )  # Add batch and channel dims
 
-                # Pad the crop prediction to fit into the full image predictions
-                padded_prediction = torch.nn.functional.pad(
-                    crop_binary_mask_batch,
-                    (
-                        int(x1),
-                        int(preds.shape[3] - x2),
-                        int(y1),
-                        int(preds.shape[2] - y2),
-                    ),
-                )
+            # Pad the crop prediction to fit into the full image predictions
+            padded_prediction = torch.nn.functional.pad(
+                crop_binary_mask_batch,
+                (
+                    int(x1),
+                    int(preds.shape[3] - x2),
+                    int(y1),
+                    int(preds.shape[2] - y2),
+                ),
+            )
 
-                preds += padded_prediction
-                count_mat[:, :, y1:y2, x1:x2] += 1
+            preds += padded_prediction
+            count_mat[:, :, y1:y2, x1:x2] += 1
 
         # Ensure no division by zero
         assert (count_mat == 0).sum() == 0, "Some pixels were not covered by any window"
@@ -273,6 +271,8 @@ class ReefSupportModel(SegmentationModelBase):
         # Run YOLO inference
         results = self.model(image_array)
 
+        # Create binary segmentation map (True/False)
+        image_width, image_height = image.size
         # Extract segmentation masks
         if (
             len(results) > 0
@@ -284,13 +284,11 @@ class ReefSupportModel(SegmentationModelBase):
                 0
             ].masks.data  # Shape: [N, H, W] where N is number of detections
 
-            if len(masks) > 0:
-                # Create binary segmentation map (True/False)
-                image_width, image_height = image.size
-                segmentation_map = torch.zeros(
-                    (image_height, image_width), dtype=torch.bool, device=self.device
-                )
+            segmentation_map = torch.zeros(
+                (image_height, image_width), dtype=torch.bool, device=self.device
+            )
 
+            if len(masks) > 0:
                 for i, mask in enumerate(masks):
                     # Get class ID for this detection
                     class_id = (
@@ -314,18 +312,9 @@ class ReefSupportModel(SegmentationModelBase):
                             segmentation_map, mask_resized
                         )
 
-                return image, segmentation_map
-            else:
-                # No masks detected, return all False
-                image_width, image_height = image.size
-                segmentation_map = torch.zeros(
-                    (image_height, image_width), dtype=torch.bool, device=self.device
-                )
-                return image, segmentation_map
         else:
-            # No masks detected, return all False
-            image_width, image_height = image.size
             segmentation_map = torch.zeros(
                 (image_height, image_width), dtype=torch.bool, device=self.device
             )
-            return image, segmentation_map
+
+        return image, segmentation_map

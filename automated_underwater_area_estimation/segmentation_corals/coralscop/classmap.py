@@ -6,17 +6,14 @@ from automated_underwater_area_estimation.segmentation_corals.class_mapping impo
 
 
 @dataclass
-class ReefSupportClassMapping(ClassMappingBase):
-    """Class mapping for the ReefSupport YOLO coral segmentation models."""
+class CoralScopeClassMapping(ClassMappingBase):
+    """Class mapping for the CoralScope coral segmentation model."""
 
     # Based on typical coral reef segmentation classes - you may need to adjust these
     CLASS_NAMES: ClassVar[Dict[int, str]] = {
         0: "background",
-        1: "hard coral",
-        2: "soft coral",
+        1: "coral",
     }
     CORAL_CLASS_IDS: ClassVar[list[int]] = [
-        1,  # "hard coral"
-        2,  # "soft coral"
+        1,  # "coral"
     ]
-

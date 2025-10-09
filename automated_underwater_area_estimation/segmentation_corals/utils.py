@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 
 
-def get_best_device(verbose: bool = False, force_device: str = "") -> torch.device:
+def get_best_device(verbose: bool = True, force_device: str = "") -> torch.device:
     """
     Get the best available device for PyTorch operations.
     Priority order: CUDA > MPS > XPU > CPU
@@ -24,9 +24,11 @@ def get_best_device(verbose: bool = False, force_device: str = "") -> torch.devi
     if torch.cuda.is_available():
         device = torch.device("cuda")
         if verbose:
-            device_info.append(f"CUDA available: {torch.cuda.get_device_name()}")
-            device_info.append(
-                f"CUDA memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB"
+            device_info.extend(
+                (
+                    f"CUDA available: {torch.cuda.get_device_name()}",
+                    f"CUDA memory: {torch.cuda.get_device_properties(0).total_memory / 1000000000.0:.1f} GB",
+                )
             )
         return device
 

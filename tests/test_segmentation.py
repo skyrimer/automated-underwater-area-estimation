@@ -4,7 +4,9 @@ from PIL import Image
 from datasets import load_dataset
 from typing import Tuple
 
-from automated_underwater_area_estimation.segmentation_corals.epfl.model import EPFLModel
+from automated_underwater_area_estimation.segmentation_corals.epfl.model import (
+    EPFLModel,
+)
 from automated_underwater_area_estimation.segmentation_corals.reefsupport.model import (
     ReefSupportModel,
 )

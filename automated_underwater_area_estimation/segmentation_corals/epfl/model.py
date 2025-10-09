@@ -8,7 +8,9 @@ from automated_underwater_area_estimation.segmentation_corals.epfl.classmap impo
 from automated_underwater_area_estimation.segmentation_corals.model import (
     SegmentationModelBase,
 )
-from automated_underwater_area_estimation.segmentation_corals.utils import get_best_device
+from automated_underwater_area_estimation.segmentation_corals.utils import (
+    get_best_device,
+)
 import torch
 from PIL import Image
 import numpy as np

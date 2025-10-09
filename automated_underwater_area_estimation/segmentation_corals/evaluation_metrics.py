@@ -43,8 +43,7 @@ def compute_segmentation_metrics(
             )
     elif isinstance(metrics, list):
         requested_metrics = set(metrics)
-        invalid = requested_metrics - available_metrics
-        if invalid:
+        if invalid := requested_metrics - available_metrics:
             raise ValueError(
                 f"Invalid metrics {invalid}. Available: {available_metrics}"
             )
@@ -83,10 +82,7 @@ def compute_segmentation_metrics(
         results["pixel_accuracy"] = (correct / total).item()
 
     # Return single value if only one metric requested
-    if len(results) == 1:
-        return next(iter(results.values()))
-
-    return results
+    return next(iter(results.values())) if len(results) == 1 else results
 
 
 # Convenience functions for backward compatibility and specific use cases
@@ -97,7 +93,9 @@ def compute_dice(
     smooth: float = 1e-6,
 ) -> float:
     """Compute Dice coefficient (F1-score) for binary masks."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "dice")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, smooth, "dice"
+    )  # pyright: ignore[reportReturnType]
 
 
 def compute_iou(
@@ -107,7 +105,9 @@ def compute_iou(
     smooth: float = 1e-6,
 ) -> float:
     """Compute Intersection over Union (IoU) for binary masks."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "iou")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, smooth, "iou"
+    )  # pyright: ignore[reportReturnType]
 
 
 def compute_precision(
@@ -117,7 +117,9 @@ def compute_precision(
     smooth: float = 1e-6,
 ) -> float:
     """Compute Precision for binary masks."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "precision")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, smooth, "precision"
+    )  # pyright: ignore[reportReturnType]
 
 
 def compute_recall(
@@ -127,7 +129,9 @@ def compute_recall(
     smooth: float = 1e-6,
 ) -> float:
     """Compute Recall (Sensitivity) for binary masks."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "recall")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, smooth, "recall"
+    )  # pyright: ignore[reportReturnType]
 
 
 def compute_pixel_accuracy(
@@ -136,7 +140,7 @@ def compute_pixel_accuracy(
     """Compute Pixel Accuracy for binary masks."""
     return compute_segmentation_metrics(
         pred_mask, gt_mask, device, metrics="pixel_accuracy"
-    )
+    )  # pyright: ignore[reportReturnType]
 
 
 def compute_all_metrics(
@@ -146,4 +150,6 @@ def compute_all_metrics(
     smooth: float = 1e-6,
 ) -> Dict[str, float]:
     """Compute all segmentation metrics at once for efficiency."""
-    return compute_segmentation_metrics(pred_mask, gt_mask, device, smooth, "all")
+    return compute_segmentation_metrics(
+        pred_mask, gt_mask, device, smooth, "all"
+    )  # pyright: ignore[reportReturnType]

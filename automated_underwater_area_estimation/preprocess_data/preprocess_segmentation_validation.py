@@ -24,7 +24,7 @@ def load_coco_annotation(annotation_data: dict) -> Tuple[List[torch.Tensor], dic
     annotations = annotation_data["annotations"]
     masks = []
 
-    for i, ann in enumerate(annotations):
+    for ann in annotations:
         # Decode RLE mask
         rle = ann["segmentation"]
         mask = coco_mask.decode(rle)

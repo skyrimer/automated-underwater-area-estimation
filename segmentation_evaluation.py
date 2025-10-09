@@ -11,14 +11,16 @@ import torch.nn.functional as F
 from automated_underwater_area_estimation.segmentation_corals.reefsupport.model import (
     ReefSupportModel,
 )
-from automated_underwater_area_estimation.segmentation_corals.epfl.model import EPFLModel
+from automated_underwater_area_estimation.segmentation_corals.epfl.model import (
+    EPFLModel,
+)
 from automated_underwater_area_estimation.segmentation_corals.segmentation_dataset import (
     CoralSegmentationDataset,
 )
 from automated_underwater_area_estimation.segmentation_corals.evaluation_metrics import (
     compute_segmentation_metrics,
 )
-
+from automated_underwater_area_estimation.segmentation_corals.coralscop.model import CoralSCOP
 
 class EvaluationPipeline:
     """Evaluation pipeline with restart support and multi-dataset capabilities."""
@@ -116,9 +118,9 @@ class EvaluationPipeline:
         models = []
 
         # ReefSupport models
-        reef_models = ["yolov8_sm_latest.pt", "yolov8_xlarge_latest.pt"]
+        reef_models = ["yolov8_sm_latest.pt"]
         for model_name in reef_models:
-            model = ReefSupportModel(model_name)
+            model = ReefSupportModel(model_name)  # pyright: ignore[reportArgumentType]
             models.append(
                 {
                     "name": f"ReefSupport_{model_name.replace('.pt', '')}",
@@ -126,21 +128,27 @@ class EvaluationPipeline:
                     "type": "ReefSupport",
                 }
             )
-
-        # EPFL models
-        epfl_models = [
-            "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024",
-            "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024",
-        ]
-        for model_name in epfl_models:
-            model = EPFLModel(model_name)
-            models.append(
-                {
-                    "name": f"EPFL_{model_name.split('/')[-1].split('-')[1]}",
-                    "model": model,
-                    "type": "EPFL",
-                }
-            )
+        # models.append(
+        #     {
+        #         "name": "CoralSCOP",
+        #         "model": CoralSCOP(),
+        #         "type": "CoralSCOP",
+        #     }
+        # )
+        # # EPFL models
+        # epfl_models = [
+        #     "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024",
+        #     "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024",
+        # ]
+        # for model_name in epfl_models:
+        #     model = EPFLModel(model_name)  # pyright: ignore[reportArgumentType]
+        #     models.append(
+        #         {
+        #             "name": f"EPFL_{model_name.split('/')[-1].split('-')[1]}",
+        #             "model": model,
+        #             "type": "EPFL",
+        #         }
+        #     )
 
         return models
 
@@ -149,40 +157,15 @@ class EvaluationPipeline:
         fig, axes = plt.subplots(1, 4, figsize=(20, 5))
 
         # Original image
-        if isinstance(image, Image.Image):
-            img_array = np.array(image)
-        else:
-            img_array = image
-        axes[0].imshow(img_array)
-        axes[0].set_title("Original Image")
-        axes[0].axis("off")
-
-        # Ground truth
-        gt_array = (
-            gt_mask.cpu().numpy() if isinstance(gt_mask, torch.Tensor) else gt_mask
-        )
-        axes[1].imshow(gt_array, cmap="gray")
-        axes[1].set_title("Ground Truth")
-        axes[1].axis("off")
-
-        # Prediction
-        pred_array = (
-            pred_mask.cpu().numpy()
-            if isinstance(pred_mask, torch.Tensor)
-            else pred_mask
-        )
-        axes[2].imshow(pred_array, cmap="gray")
-        axes[2].set_title("Prediction")
-        axes[2].axis("off")
-
+        img_array = np.array(image) if isinstance(image, Image.Image) else image
+        self.setup_image(axes, 0, img_array, "Original Image")
+        gt_array = self.setup_grayscale_image(gt_mask, axes, 1, "Ground Truth")
+        pred_array = self.setup_grayscale_image(pred_mask, axes, 2, "Prediction")
         # Overlay
         axes[3].imshow(img_array)
         colored_mask = np.zeros((*pred_array.shape, 4))
         colored_mask[pred_array.astype(bool)] = [1, 0, 0, 0.5]  # Red overlay
-        axes[3].imshow(colored_mask)
-        axes[3].set_title("Overlay")
-        axes[3].axis("off")
-
+        self.setup_image(axes, 3, colored_mask, "Overlay")
         plt.suptitle(title)
         plt.tight_layout()
 
@@ -191,6 +174,20 @@ class EvaluationPipeline:
             plt.close(fig)
         else:
             return fig
+
+    def setup_image(self, axes, arg1, arg2, arg3):
+        axes[arg1].imshow(arg2)
+        axes[arg1].set_title(arg3)
+        axes[arg1].axis("off")
+
+    def setup_grayscale_image(self, arg0, axes, arg2, arg3):
+        # Ground truth
+        result = arg0.cpu().numpy() if isinstance(arg0, torch.Tensor) else arg0
+        axes[arg2].imshow(result, cmap="gray")
+        axes[arg2].set_title(arg3)
+        axes[arg2].axis("off")
+
+        return result
 
     def evaluate_single_model(
         self, model_info, dataset, dataset_name, save_images_every=100, resume=True
@@ -311,8 +308,9 @@ class EvaluationPipeline:
         all_metrics_for_summary = [result["metrics"] for result in all_results]
 
         # Compute and save summary statistics
+        summary_path = None
+        summary_stats = {}
         if all_metrics_for_summary:
-            summary_stats = {}
             for metric in all_metrics_for_summary[0].keys():
                 values = [m[metric] for m in all_metrics_for_summary]
                 summary_stats[f"{metric}_mean"] = float(np.mean(values))
@@ -351,11 +349,13 @@ class EvaluationPipeline:
         config_path = model_dir / "model_config.json"
         with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
-
         print(f"Saved {len(all_results)} results to {model_dir}")
         print(f"  - Detailed results: {jsonl_file}")
-        print(f"  - Summary statistics: {summary_path}")
+        print(
+            f"  - Summary statistics: {summary_path if summary_path is not None else 'N/A'}"
+        )
         print(f"  - Sample images: {images_dir}")
+        print(f"  - Prediction masks: {model_dir / 'prediction_masks'}")
         print(f"  - Prediction masks: {model_dir / 'prediction_masks'}")
 
         return all_results, summary_stats if all_metrics_for_summary else {}
@@ -508,10 +508,7 @@ class EvaluationPipeline:
     def evaluate_on_dataset(self, dataset_path, dataset_name, resume=True):
         """Evaluate all models on a specific dataset."""
 
-        print(f"\n{'=' * 60}")
-        print(f"EVALUATING ON DATASET: {dataset_name}")
-        print(f"{'=' * 60}")
-
+        self.highlight_section("EVALUATING ON DATASET: ", dataset_name)
         # Load dataset
         dataset = CoralSegmentationDataset(dataset_path)
         print(f"Dataset size: {len(dataset)}")
@@ -540,11 +537,7 @@ class EvaluationPipeline:
         # Create dataset comparison
         comparison_data = self.create_dataset_comparison(dataset_name, all_summaries)
 
-        # Print summary for this dataset
-        print(f"\n{'=' * 60}")
-        print(f"EVALUATION SUMMARY - {dataset_name}")
-        print(f"{'=' * 60}")
-
+        self.highlight_section("EVALUATION SUMMARY - ", dataset_name)
         for model_name, summary in all_summaries.items():
             print(f"\n{model_name}:")
             print("-" * 50)
@@ -557,6 +550,11 @@ class EvaluationPipeline:
 
         return all_results, all_summaries, comparison_data
 
+    def highlight_section(self, arg0, dataset_name):
+        print(f"\n{'=' * 60}")
+        print(f"{arg0}{dataset_name}")
+        print(f"{'=' * 60}")
+
 
 # Usage example - evaluate on multiple datasets
 def main():
@@ -565,10 +563,15 @@ def main():
 
     # Define datasets to evaluate on
     datasets = {
-        "coralscop_test": "./automated_underwater_area_estimation/data_preprocessed/coralscop/test",
-        # Add more datasets here as needed
-        # "coralscop_val": "./automated_underwater_area_estimation/data_preprocessed/coralscop/val",
-        # "another_dataset": "/path/to/another/dataset",
+        # "coralscop_test": "./automated_underwater_area_estimation/data_preprocessed/coralscop/test",
+        "SEAFLOWER_BOLIVAR": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAFLOWER_BOLIVAR",
+        "SEAFLOWER_COURTOWN": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAFLOWER_COURTOWN",
+        "SEAVIEW_ATL": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_ATL",
+        "SEAVIEW_IDN_PHL": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_IDN_PHL",
+        "SEAVIEW_PAC_AUS": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_PAC_AUS",
+        "SEAVIEW_PAC_USA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_PAC_USA",
+        "TETES_PROVIDENCIA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/TETES_PROVIDENCIA",
+        "UNAL_BLEACHING_TAYRONA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/UNAL_BLEACHING_TAYRONA",
     }
 
     # Evaluate on each dataset

@@ -12,21 +12,23 @@ import json
 st.set_page_config(page_title="SAM2 Segmentation Labeling", layout="wide")
 
 # Initialize session state
-if 'current_image_idx' not in st.session_state:
+if "current_image_idx" not in st.session_state:
     st.session_state.current_image_idx = 0
-if 'clicks' not in st.session_state:
-    st.session_state.clicks = []  # List of tuples: [(x, y, label), ...] where label is 1 (positive) or 0 (negative)
-if 'click_mode' not in st.session_state:
+if "clicks" not in st.session_state:
+    st.session_state.clicks = (
+        []
+    )  # List of tuples: [(x, y, label), ...] where label is 1 (positive) or 0 (negative)
+if "click_mode" not in st.session_state:
     st.session_state.click_mode = 1  # 1 for positive, 0 for negative
-if 'image_list' not in st.session_state:
+if "image_list" not in st.session_state:
     st.session_state.image_list = []
-if 'model' not in st.session_state:
+if "model" not in st.session_state:
     st.session_state.model = None
-if 'predictor' not in st.session_state:
+if "predictor" not in st.session_state:
     st.session_state.predictor = None
-if 'current_mask' not in st.session_state:
+if "current_mask" not in st.session_state:
     st.session_state.current_mask = None
-if 'labeled_images' not in st.session_state:
+if "labeled_images" not in st.session_state:
     st.session_state.labeled_images = set()
 
 # Configuration
@@ -47,7 +49,11 @@ CLICKS_DIR.mkdir(parents=True, exist_ok=True)
 @st.cache_resource
 def load_model(checkpoint_path=CHECKPOINT_PATH, sam_variant=SAM_VARIANT):
     """Load AquaSAM model (cached)"""
-    device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    device = (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps" if torch.backends.mps.is_available() else "cpu"
+    )
 
     # Build SAM and load AquaSAM weights (fine-tuned on underwater data)
     sam = sam_model_registry[sam_variant](checkpoint=checkpoint_path)
@@ -58,7 +64,9 @@ def load_model(checkpoint_path=CHECKPOINT_PATH, sam_variant=SAM_VARIANT):
     return sam, predictor, device
 
 
-def resize_image_proportional(image: Image.Image, target_size: int = 1024) -> Image.Image:
+def resize_image_proportional(
+    image: Image.Image, target_size: int = 1024
+) -> Image.Image:
     """
     Resize image so the smaller side equals target_size, maintaining aspect ratio.
 
@@ -103,9 +111,7 @@ def upscale_mask_to_original(mask: torch.Tensor, target_size: tuple) -> torch.Te
 
     # Interpolate to target size (note: interpolate expects (height, width))
     upscaled = torch.nn.functional.interpolate(
-        mask_4d,
-        size=(target_height, target_width),
-        mode='nearest'
+        mask_4d, size=(target_height, target_width), mode="nearest"
     )
 
     # Remove batch and channel dimensions and convert back to bool
@@ -116,8 +122,10 @@ def upscale_mask_to_original(mask: torch.Tensor, target_size: tuple) -> torch.Te
 
 def get_unlabeled_images():
     """Get list of unlabeled images"""
-    all_images = sorted([f for f in IMAGES_DIR.glob("*.JPG") if f.is_file()] +
-                        [f for f in IMAGES_DIR.glob("*.jpg") if f.is_file()])
+    all_images = sorted(
+        [f for f in IMAGES_DIR.glob("*.JPG") if f.is_file()]
+        + [f for f in IMAGES_DIR.glob("*.jpg") if f.is_file()]
+    )
 
     # Check which images already have masks
     labeled = set()
@@ -143,14 +151,16 @@ def segment_object_from_clicks(image, clicks, predictor, device):
 
     # Separate points and labels from clicks
     # clicks is now a list of tuples: [(x, y, label), ...]
-    pts = np.array([(click[0], click[1]) for click in clicks], dtype=np.float32)  # (K, 2) in (x, y)
-    lbl = np.array([click[2] for click in clicks], dtype=np.int32)  # labels: 1 for positive, 0 for negative
+    pts = np.array(
+        [(click[0], click[1]) for click in clicks], dtype=np.float32
+    )  # (K, 2) in (x, y)
+    lbl = np.array(
+        [click[2] for click in clicks], dtype=np.int32
+    )  # labels: 1 for positive, 0 for negative
 
     # Predict
     masks, scores, logits = predictor.predict(
-        point_coords=pts,
-        point_labels=lbl,
-        multimask_output=False  # Get one best mask
+        point_coords=pts, point_labels=lbl, multimask_output=False  # Get one best mask
     )
 
     # masks -> (N, H, W) boolean; we asked for 1 variant, so N==1
@@ -173,7 +183,7 @@ def visualize_segmentation(image, mask, clicks):
     ax.imshow(image)
 
     if mask is not None:
-        ax.imshow(mask, alpha=0.5, cmap='Blues')
+        ax.imshow(mask, alpha=0.5, cmap="Blues")
 
     if len(clicks) > 0:
         # Separate positive and negative clicks
@@ -186,22 +196,36 @@ def visualize_segmentation(image, mask, clicks):
         # Plot positive clicks in green
         if positive_clicks:
             positive_array = np.array(positive_clicks)
-            ax.scatter(positive_array[:, 0], positive_array[:, 1],
-                       c='green', s=marker_size, marker='o', edgecolors='white', linewidths=3)
+            ax.scatter(
+                positive_array[:, 0],
+                positive_array[:, 1],
+                c="green",
+                s=marker_size,
+                marker="o",
+                edgecolors="white",
+                linewidths=3,
+            )
 
         # Plot negative clicks in red
         if negative_clicks:
             negative_array = np.array(negative_clicks)
-            ax.scatter(negative_array[:, 0], negative_array[:, 1],
-                       c='red', s=marker_size, marker='o', edgecolors='white', linewidths=3)
+            ax.scatter(
+                negative_array[:, 0],
+                negative_array[:, 1],
+                c="red",
+                s=marker_size,
+                marker="o",
+                edgecolors="white",
+                linewidths=3,
+            )
 
-    ax.axis('off')
+    ax.axis("off")
     ax.set_xlim(0, img_width)
     ax.set_ylim(img_height, 0)  # Invert y-axis to match image coordinates
 
     # Convert plot to image
     buf = BytesIO()
-    plt.savefig(buf, format='png', dpi=dpi, bbox_inches='tight', pad_inches=0)
+    plt.savefig(buf, format="png", dpi=dpi, bbox_inches="tight", pad_inches=0)
     buf.seek(0)
     plt.close()
 
@@ -211,6 +235,7 @@ def visualize_segmentation(image, mask, clicks):
         result_img = result_img.resize(image.size, Image.LANCZOS)
 
     return result_img
+
 
 def save_segmentation(image_path, mask, clicks, working_size, save_size):
     """
@@ -235,19 +260,21 @@ def save_segmentation(image_path, mask, clicks, working_size, save_size):
     scale_y = save_size[1] / working_size[1]
 
     # Scale clicks to save size coordinates (preserve labels)
-    scaled_clicks = [[int(x * scale_x), int(y * scale_y), label] for x, y, label in clicks]
+    scaled_clicks = [
+        [int(x * scale_x), int(y * scale_y), label] for x, y, label in clicks
+    ]
 
     # Save metadata
     metadata_path = CLICKS_DIR / f"{image_path.stem}_metadata.json"
     metadata = {
-        'clicks_working': clicks,  # Clicks at working resolution with labels
-        'clicks_original': scaled_clicks,  # Clicks scaled to save resolution with labels
-        'working_size': list(working_size),
-        'save_size': list(save_size),
-        'mask_size': list(upscaled_mask.shape),
-        'image_name': image_path.name
+        "clicks_working": clicks,  # Clicks at working resolution with labels
+        "clicks_original": scaled_clicks,  # Clicks scaled to save resolution with labels
+        "working_size": list(working_size),
+        "save_size": list(save_size),
+        "mask_size": list(upscaled_mask.shape),
+        "image_name": image_path.name,
     }
-    with open(metadata_path, 'w') as f:
+    with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
 
     return mask_path
@@ -274,14 +301,17 @@ if not st.session_state.image_list:
 # Sidebar
 with st.sidebar:
     st.header("Progress")
-    total_images = len(st.session_state.image_list) + len(st.session_state.labeled_images)
+    total_images = len(st.session_state.image_list) + len(
+        st.session_state.labeled_images
+    )
     labeled_count = len(st.session_state.labeled_images)
     st.metric("Labeled Images", f"{labeled_count}/{total_images}")
     st.progress(labeled_count / total_images if total_images > 0 else 0)
 
     st.divider()
     st.header("Instructions")
-    st.markdown("""
+    st.markdown(
+        """
     1. **Toggle** between positive (✅) and negative (❌) mode
     2. Click on the image to add points
        - **Green dots**: Positive points (include in mask)
@@ -296,7 +326,8 @@ with st.sidebar:
     - Images are scaled (smaller side = 1024px)
     - Segmentation is performed on scaled image
     - Masks are upscaled to 4000x3000 when saved
-    """)
+    """
+    )
 
     st.divider()
     st.info(f"Device: {device.upper()}")
@@ -339,30 +370,30 @@ with col2:
     mode_color = "green" if st.session_state.click_mode == 1 else "red"
 
     if st.button(f"{mode_emoji} Mode: {mode_text}", use_container_width=True):
-        st.session_state.click_mode = 1 - st.session_state.click_mode  # Toggle between 0 and 1
+        st.session_state.click_mode = (
+            1 - st.session_state.click_mode
+        )  # Toggle between 0 and 1
         st.rerun()
-
 
 
 with col3:
     # Generate mask button
-    if st.button("🎯 Generate Mask", disabled=len(st.session_state.clicks) == 0, use_container_width=True):
+    if st.button(
+        "🎯 Generate Mask",
+        disabled=len(st.session_state.clicks) == 0,
+        use_container_width=True,
+    ):
         with st.spinner("Generating segmentation..."):
             # Segment on working image
             mask = segment_object_from_clicks(
-                working_image,
-                st.session_state.clicks,
-                predictor,
-                device
+                working_image, st.session_state.clicks, predictor, device
             )
             st.session_state.current_mask = mask
         # st.success(f"✓ Mask generated!\nWorking size: {st.session_state.current_mask.shape}")
 
 # Create visualization
 viz_image = visualize_segmentation(
-    working_image,
-    st.session_state.current_mask,
-    st.session_state.clicks
+    working_image, st.session_state.current_mask, st.session_state.clicks
 )
 
 # Use streamlit-image-coordinates for click detection
@@ -370,14 +401,15 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 
 # Display clickable image
 value = streamlit_image_coordinates(
-    viz_image,
-    key=f"image_{current_image_path.stem}_{len(st.session_state.clicks)}"
+    viz_image, key=f"image_{current_image_path.stem}_{len(st.session_state.clicks)}"
 )
 
 # Handle click
 if value is not None:
     x, y = value["x"], value["y"]
-    st.session_state.clicks.append((x, y, st.session_state.click_mode))  # Add label to click
+    st.session_state.clicks.append(
+        (x, y, st.session_state.click_mode)
+    )  # Add label to click
     st.rerun()
 
 # Action buttons
@@ -391,9 +423,11 @@ with col1:
             st.session_state.current_mask,
             st.session_state.clicks,
             (working_width, working_height),
-            SAVE_SIZE
+            SAVE_SIZE,
         )
-        st.success(f"✓ Saved to {mask_path.name}\n(Upscaled to {SAVE_SIZE[0]}x{SAVE_SIZE[1]})")
+        st.success(
+            f"✓ Saved to {mask_path.name}\n(Upscaled to {SAVE_SIZE[0]}x{SAVE_SIZE[1]})"
+        )
 
         # Move to next image
         st.session_state.labeled_images.add(current_image_path)
@@ -409,7 +443,9 @@ with col1:
 with col2:
     if st.button("⏭️ Skip"):
         # Move to next image without saving
-        st.session_state.current_image_idx = (st.session_state.current_image_idx + 1) % len(st.session_state.image_list)
+        st.session_state.current_image_idx = (
+            st.session_state.current_image_idx + 1
+        ) % len(st.session_state.image_list)
         st.session_state.clicks = []
         st.session_state.current_mask = None
         st.rerun()
@@ -422,7 +458,9 @@ with col3:
 
 with col4:
     if st.button("⬅️ Previous"):
-        st.session_state.current_image_idx = (st.session_state.current_image_idx - 1) % len(st.session_state.image_list)
+        st.session_state.current_image_idx = (
+            st.session_state.current_image_idx - 1
+        ) % len(st.session_state.image_list)
         st.session_state.clicks = []
         st.session_state.current_mask = None
         st.rerun()
