@@ -212,3 +212,4 @@ data/
 data_preprocessed/
 evaluation_results/
 aquasam_weights.pth
+checkpoints/

@@ -153,7 +153,7 @@ class CoralSCOP(SegmentationModelBase):
         return image.resize((new_w, new_h))
 
     def segment_image_sliding_window(
-        self, image: Image.Image, crop_size: Tuple[int, int] | None = None
+        self, image: Image.Image
     ) -> Tuple[Image.Image, torch.Tensor]:
         """
         Segment a high-resolution image using sliding window approach.
@@ -165,11 +165,8 @@ class CoralSCOP(SegmentationModelBase):
         Returns:
             Tuple of (original_image, segmentation_map)
         """
-        if crop_size is None:
-            # Convert from PIL format (width, height) to tensor format (height, width)
-            crop_size = (self.ideal_size[1], self.ideal_size[0])
 
-        h_crop, w_crop = crop_size  # Tensor format: (height, width)
+        h_crop, w_crop = self.ideal_size[::-1]  # Tensor format: (height, width)
 
         # Resize image maintaining aspect ratio with smaller side = 1024
         resized_img = self.resize_image(image, target_size=1024)

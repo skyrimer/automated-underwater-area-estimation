@@ -118,23 +118,23 @@ class EvaluationPipeline:
         models = []
 
         # ReefSupport models
-        reef_models = ["yolov8_sm_latest.pt"]
-        for model_name in reef_models:
-            model = ReefSupportModel(model_name)  # pyright: ignore[reportArgumentType]
-            models.append(
-                {
-                    "name": f"ReefSupport_{model_name.replace('.pt', '')}",
-                    "model": model,
-                    "type": "ReefSupport",
-                }
-            )
-        # models.append(
-        #     {
-        #         "name": "CoralSCOP",
-        #         "model": CoralSCOP(),
-        #         "type": "CoralSCOP",
-        #     }
-        # )
+        # reef_models = ["yolov8_sm_latest.pt"]
+        # for model_name in reef_models:
+        #     model = ReefSupportModel(model_name)  # pyright: ignore[reportArgumentType]
+        #     models.append(
+        #         {
+        #             "name": f"ReefSupport_{model_name.replace('.pt', '')}",
+        #             "model": model,
+        #             "type": "ReefSupport",
+        #         }
+        #     )
+        models.append(
+            {
+                "name": "CoralSCOP",
+                "model": CoralSCOP(),
+                "type": "CoralSCOP",
+            }
+        )
         # # EPFL models
         # epfl_models = [
         #     "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024",
@@ -233,7 +233,7 @@ class EvaluationPipeline:
                 # Get data
                 image, gt_mask = dataset[idx]
                 pred_image, pred_mask = model.segment_image(
-                    image, adjust_size=False, use_sliding_window=True
+                    image, adjust_size=False, use_sliding_window=False
                 )
                 if gt_mask.shape != pred_mask.shape:
                     gt_mask = (
@@ -604,7 +604,7 @@ def main():
             metrics_str = " | ".join(
                 [
                     f"{metric}: {summary.get(f'{metric}_mean', 0):.3f}"
-                    for metric in metrics_names[:3]
+                    for metric in metrics_names
                 ]
             )
             print(f"  {model_name:30}: {metrics_str}")
