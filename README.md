@@ -38,6 +38,15 @@ poetry install
 ```
 This will install both regular and development dependencies such as `pytest` and `black`.
 
+#### Torch with CUDA installation for Windows
+On Windows, regardless if you have CUDA support or not, cpu-only version will be installed. To install torch with CUDA support, follow the instructions [here](https://pytorch.org/get-started/locally/), or run
+```bash
+poetry source add --priority=explicit pytorch-cu129 https://download.pytorch.org/whl/cu129
+poetry add --group cuda --source pytorch-cu129 torch torchvision
+poetry install --with cuda --without cpu
+```
+and adjust the CUDA version accordingly.
+
 ### 3. Activate the Poetry Environment
 After installation, activate the environment created by `Poetry`:
 ```

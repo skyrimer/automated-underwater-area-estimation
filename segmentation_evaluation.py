@@ -118,16 +118,16 @@ class EvaluationPipeline:
         models = []
 
         # ReefSupport models
-        # reef_models = ["yolov8_sm_latest.pt"]
-        # for model_name in reef_models:
-        #     model = ReefSupportModel(model_name)  # pyright: ignore[reportArgumentType]
-        #     models.append(
-        #         {
-        #             "name": f"ReefSupport_{model_name.replace('.pt', '')}",
-        #             "model": model,
-        #             "type": "ReefSupport",
-        #         }
-        #     )
+        reef_models = ["yolov8_sm_latest.pt", "yolov8_xlarge_latest.pt"]
+        for model_name in reef_models:
+            model = ReefSupportModel(model_name)  # pyright: ignore[reportArgumentType]
+            models.append(
+                {
+                    "name": f"ReefSupport_{model_name.replace('.pt', '')}",
+                    "model": model,
+                    "type": "ReefSupport",
+                }
+            )
         models.append(
             {
                 "name": "CoralSCOP",
@@ -136,19 +136,19 @@ class EvaluationPipeline:
             }
         )
         # EPFL models
-        # epfl_models = [
-        #     "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024",
-        #     "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024",
-        # ]
-        # for model_name in epfl_models:
-        #     model = EPFLModel(model_name)  # pyright: ignore[reportArgumentType]
-        #     models.append(
-        #         {
-        #             "name": f"EPFL_{model_name.split('/')[-1].split('-')[1]}",
-        #             "model": model,
-        #             "type": "EPFL",
-        #         }
-        #     )
+        epfl_models = [
+            "EPFL-ECEO/segformer-b2-finetuned-coralscapes-1024-1024",
+            "EPFL-ECEO/segformer-b5-finetuned-coralscapes-1024-1024",
+        ]
+        for model_name in epfl_models:
+            model = EPFLModel(model_name)  # pyright: ignore[reportArgumentType]
+            models.append(
+                {
+                    "name": f"EPFL_{model_name.split('/')[-1].split('-')[1]}",
+                    "model": model,
+                    "type": "EPFL",
+                }
+            )
 
         return models
 

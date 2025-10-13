@@ -44,22 +44,6 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
-# [[tool.poetry.source]]
-# name = "pytorch-cu129"
-# url = "https://download.pytorch.org/whl/cu129"
-# priority = "explicit"
-
-# [tool.poetry.group.cpu]
-# optional = true
-# [tool.poetry.group.cpu.dependencies]
-# torch = { version = ">=2.8.0,<3.0.0" }
-# torchvision = { version = ">=0.23.0,<0.24.0" }
-
-# [tool.poetry.group.cuda]
-# optional = true
-# [tool.poetry.group.cuda.dependencies]
-# torch = { version = ">=2.8.0,<3.0.0", source = "pytorch-cu129" }
-# torchvision = { version = ">=0.23.0,<0.24.0", source = "pytorch-cu129" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.9.0"
