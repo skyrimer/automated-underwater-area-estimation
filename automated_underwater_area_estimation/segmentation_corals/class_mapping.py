@@ -59,6 +59,5 @@ class ClassMappingBase(ABC):
         """Get total number of classes."""
         return len(cls.CLASS_NAMES)
 
-
     def __repr__(self) -> str:
         return self.__str__()

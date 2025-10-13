@@ -19,4 +19,3 @@ class ReefSupportClassMapping(ClassMappingBase):
         1,  # "hard coral"
         2,  # "soft coral"
     ]
-

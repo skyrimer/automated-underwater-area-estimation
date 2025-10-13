@@ -20,7 +20,10 @@ from automated_underwater_area_estimation.segmentation_corals.segmentation_datas
 from automated_underwater_area_estimation.segmentation_corals.evaluation_metrics import (
     compute_segmentation_metrics,
 )
-from automated_underwater_area_estimation.segmentation_corals.coralscop.model import CoralSCOP
+from automated_underwater_area_estimation.segmentation_corals.coralscop.model import (
+    CoralSCOP,
+)
+
 
 class EvaluationPipeline:
     """Evaluation pipeline with restart support and multi-dataset capabilities."""

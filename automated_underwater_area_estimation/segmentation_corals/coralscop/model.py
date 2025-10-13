@@ -10,15 +10,17 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-from automated_underwater_area_estimation.segmentation_corals.coralscop.classmap import \
-    CoralScopeClassMapping
-from automated_underwater_area_estimation.segmentation_corals.model import \
-    SegmentationModelBase
-from automated_underwater_area_estimation.segmentation_corals.utils import \
-    get_best_device
+from automated_underwater_area_estimation.segmentation_corals.coralscop.classmap import (
+    CoralScopeClassMapping,
+)
+from automated_underwater_area_estimation.segmentation_corals.model import (
+    SegmentationModelBase,
+)
+from automated_underwater_area_estimation.segmentation_corals.utils import (
+    get_best_device,
+)
 
-from .local_segment_anything import (SamAutomaticMaskGenerator,
-                                     sam_model_registry)
+from .local_segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 
 
 class CoralSCOP(SegmentationModelBase):
@@ -54,14 +56,14 @@ class CoralSCOP(SegmentationModelBase):
             response.raise_for_status()
 
             # Get file size for progress bar
-            total_size = int(response.headers.get('content-length', 0))
+            total_size = int(response.headers.get("content-length", 0))
 
             # Download with tqdm progress bar
-            with open(output_path, 'wb') as file:
+            with open(output_path, "wb") as file:
                 with tqdm(
                     desc="Downloading checkpoint",
                     total=total_size,
-                    unit='B',
+                    unit="B",
                     unit_scale=True,
                     unit_divisor=1024,
                 ) as pbar:
@@ -106,7 +108,8 @@ class CoralSCOP(SegmentationModelBase):
         if not os.path.exists(full_checkpoint_path):
             print(f"Checkpoint not found at {full_checkpoint_path}")
             self._download_checkpoint(
-                self.DEFAULT_CHECKPOINT_URL, str(full_checkpoint_path))
+                self.DEFAULT_CHECKPOINT_URL, str(full_checkpoint_path)
+            )
 
         checkpoint_path = str(full_checkpoint_path)
 
@@ -115,8 +118,7 @@ class CoralSCOP(SegmentationModelBase):
 
         # Load the SAM model with vit_b backbone
         print(self.checkpoint_path)
-        self.model = sam_model_registry["vit_b"](
-            checkpoint=self.checkpoint_path)
+        self.model = sam_model_registry["vit_b"](checkpoint=self.checkpoint_path)
         self.model.to(device=self.device)
         self.model.eval()
 
@@ -172,8 +174,7 @@ class CoralSCOP(SegmentationModelBase):
         resized_img = self.resize_image(image, target_size=1024)
 
         # Convert to tensor format: (1, C, H, W)
-        img = torch.Tensor(
-            np.array(resized_img).transpose(2, 0, 1)).unsqueeze(0)
+        img = torch.Tensor(np.array(resized_img).transpose(2, 0, 1)).unsqueeze(0)
         batch_size, _, h_img, w_img = img.size()
 
         # Move to device
@@ -217,11 +218,7 @@ class CoralSCOP(SegmentationModelBase):
             with torch.no_grad():
                 # Convert crop tensor back to PIL for SAM processing
                 crop_array = (
-                    crop_img.squeeze(0)
-                    .permute(1, 2, 0)
-                    .cpu()
-                    .numpy()
-                    .astype(np.uint8)
+                    crop_img.squeeze(0).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
                 )
                 crop_pil = Image.fromarray(crop_array)
 
@@ -244,8 +241,9 @@ class CoralSCOP(SegmentationModelBase):
             for mask_data in masks:
                 segmentation = mask_data["segmentation"]
                 # Convert to tensor and add to crop mask
-                mask_tensor = torch.from_numpy(
-                    segmentation.astype(np.float32)).to(self.device)
+                mask_tensor = torch.from_numpy(segmentation.astype(np.float32)).to(
+                    self.device
+                )
                 crop_binary_mask = torch.maximum(crop_binary_mask, mask_tensor)
 
             # Add crop prediction to global prediction map using padding
@@ -266,8 +264,7 @@ class CoralSCOP(SegmentationModelBase):
             count_mat[:, :, y1:y2, x1:x2] += 1
 
         # Ensure no division by zero
-        assert (count_mat == 0).sum(
-        ) == 0, "Some pixels were not covered by any window"
+        assert (count_mat == 0).sum() == 0, "Some pixels were not covered by any window"
 
         # Average overlapping predictions
         preds = preds / count_mat
@@ -334,7 +331,8 @@ class CoralSCOP(SegmentationModelBase):
                 print(f"Error during mask generation: {e}")
                 # Return empty mask on error
                 empty_mask = torch.zeros(
-                    (height, width), dtype=torch.bool, device=self.device)
+                    (height, width), dtype=torch.bool, device=self.device
+                )
                 return image, empty_mask
 
         # Combine all masks into a single binary mask
@@ -350,8 +348,7 @@ class CoralSCOP(SegmentationModelBase):
             )
 
         # Convert to boolean tensor and move to device
-        binary_mask = torch.from_numpy(
-            combined_mask.astype(bool)).to(self.device)
+        binary_mask = torch.from_numpy(combined_mask.astype(bool)).to(self.device)
 
         return image, binary_mask
 

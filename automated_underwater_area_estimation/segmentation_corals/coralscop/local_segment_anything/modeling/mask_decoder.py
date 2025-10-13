@@ -52,10 +52,14 @@ class MaskDecoder(nn.Module):
         self.mask_tokens = nn.Embedding(self.num_mask_tokens, transformer_dim)
 
         self.output_upscaling = nn.Sequential(
-            nn.ConvTranspose2d(transformer_dim, transformer_dim // 4, kernel_size=2, stride=2),
+            nn.ConvTranspose2d(
+                transformer_dim, transformer_dim // 4, kernel_size=2, stride=2
+            ),
             LayerNorm2d(transformer_dim // 4),
             activation(),
-            nn.ConvTranspose2d(transformer_dim // 4, transformer_dim // 8, kernel_size=2, stride=2),
+            nn.ConvTranspose2d(
+                transformer_dim // 4, transformer_dim // 8, kernel_size=2, stride=2
+            ),
             activation(),
         )
         self.output_hypernetworks_mlps = nn.ModuleList(
@@ -105,7 +109,7 @@ class MaskDecoder(nn.Module):
           torch.Tensor: batched predicted masks
           torch.Tensor: batched predictions of mask quality
         """
-        masks, iou_pred, cate_pred,fc_features = self.predict_masks(
+        masks, iou_pred, cate_pred, fc_features = self.predict_masks(
             image_embeddings=image_embeddings,
             image_pe=image_pe,
             sparse_prompt_embeddings=sparse_prompt_embeddings,
@@ -119,7 +123,7 @@ class MaskDecoder(nn.Module):
             mask_slice = slice(0, 1)
         masks = masks[:, mask_slice, :, :]
         iou_pred = iou_pred[:, mask_slice]
-        cate_pred = cate_pred[:,mask_slice,:]
+        cate_pred = cate_pred[:, mask_slice, :]
         fc_features = fc_features[:, mask_slice, :]
 
         # Prepare output
@@ -134,8 +138,12 @@ class MaskDecoder(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Predicts masks. See 'forward' for more details."""
         # Concatenate output tokens
-        output_tokens = torch.cat([self.iou_token.weight, self.mask_tokens.weight], dim=0)
-        output_tokens = output_tokens.unsqueeze(0).expand(sparse_prompt_embeddings.size(0), -1, -1)
+        output_tokens = torch.cat(
+            [self.iou_token.weight, self.mask_tokens.weight], dim=0
+        )
+        output_tokens = output_tokens.unsqueeze(0).expand(
+            sparse_prompt_embeddings.size(0), -1, -1
+        )
         tokens = torch.cat((output_tokens, sparse_prompt_embeddings), dim=1)
 
         # Expand per-image data in batch direction to be per-mask
@@ -148,31 +156,36 @@ class MaskDecoder(nn.Module):
         # queries and keys
         hs, src = self.transformer(src, pos_src, tokens)
         iou_token_out = hs[:, 0, :]
-        mask_tokens_out = hs[:, 1: (1 + self.num_mask_tokens), :] # original implementation
-
+        mask_tokens_out = hs[
+            :, 1 : (1 + self.num_mask_tokens), :
+        ]  # original implementation
 
         # Upscale mask embeddings and predict masks using the mask tokens
-        projected_feature = self.cate_feature_projection_head(src).transpose(2,1)
+        projected_feature = self.cate_feature_projection_head(src).transpose(2, 1)
         src = src.transpose(1, 2).view(b, c, h, w)
 
         upscaled_embedding = self.output_upscaling(src)
         hyper_in_list: List[torch.Tensor] = []
         cate_hyper_in_list: List[torch.Tensor] = []
         for i in range(self.num_mask_tokens):
-            hyper_in_list.append(self.output_hypernetworks_mlps[i](mask_tokens_out[:, i, :]))
-            cate_hyper_in_list.append(self.cate_output_hypernetworks_mlps[i](mask_tokens_out[:, i, :]))
+            hyper_in_list.append(
+                self.output_hypernetworks_mlps[i](mask_tokens_out[:, i, :])
+            )
+            cate_hyper_in_list.append(
+                self.cate_output_hypernetworks_mlps[i](mask_tokens_out[:, i, :])
+            )
 
         hyper_in = torch.stack(hyper_in_list, dim=1)
         cate_hyper_in = torch.stack(cate_hyper_in_list, dim=1)
 
         b, c, h, w = upscaled_embedding.shape
         masks = (hyper_in @ upscaled_embedding.view(b, c, h * w)).view(b, -1, h, w)
-        features = (cate_hyper_in @ projected_feature)
+        features = cate_hyper_in @ projected_feature
 
         # Generate mask quality predictions
         iou_pred = self.iou_prediction_head(iou_token_out)
-        cate_pred,fc_features = self.cate_prediction_head(features)
-        cate_pred=cate_pred.view(b,-1,self.cate_num)
+        cate_pred, fc_features = self.cate_prediction_head(features)
+        cate_pred = cate_pred.view(b, -1, self.cate_num)
 
         return masks, iou_pred, cate_pred, fc_features
 
@@ -203,6 +216,7 @@ class MLP(nn.Module):
             x = F.sigmoid(x)
         return x
 
+
 class MLP_withfeature(nn.Module):
     def __init__(
         self,
@@ -211,7 +225,7 @@ class MLP_withfeature(nn.Module):
         output_dim: int,
         num_layers: int,
         sigmoid_output: bool = False,
-    )  -> None:
+    ) -> None:
         super().__init__()
         self.num_layers = num_layers
         h = [hidden_dim] * (num_layers - 1)
@@ -221,13 +235,13 @@ class MLP_withfeature(nn.Module):
         self.sigmoid_output = sigmoid_output
 
     def forward(self, x) -> Tuple[torch.Tensor, torch.Tensor]:
-        features=None
+        features = None
         for i, layer in enumerate(self.layers):
-            if i == self.num_layers-1:
-                features=x
-                x=layer(x)
+            if i == self.num_layers - 1:
+                features = x
+                x = layer(x)
             else:
                 x = F.relu(layer(x))
         if self.sigmoid_output:
             x = F.sigmoid(x)
-        return x,features
+        return x, features

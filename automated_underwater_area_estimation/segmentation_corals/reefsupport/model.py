@@ -151,11 +151,7 @@ class ReefSupportModel(SegmentationModelBase):
             with torch.no_grad():
                 # Convert crop tensor back to PIL for YOLO processing
                 crop_array = (
-                    crop_img.squeeze(0)
-                    .permute(1, 2, 0)
-                    .cpu()
-                    .numpy()
-                    .astype(np.uint8)
+                    crop_img.squeeze(0).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
                 )
                 crop_pil = Image.fromarray(crop_array)
 

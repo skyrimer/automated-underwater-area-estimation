@@ -8,7 +8,7 @@ from automated_underwater_area_estimation.preprocess_data.preprocess_data import
     copy_images_and_cpcs,
 )
 from automated_underwater_area_estimation.preprocess_data.preprocess_reefsupport import (
-    process_all_reef_support_folders
+    process_all_reef_support_folders,
 )
 
 package_name = "automated_underwater_area_estimation"

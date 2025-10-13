@@ -9,7 +9,13 @@ import torch
 
 from functools import partial
 
-from .modeling import ImageEncoderViT, MaskDecoder, PromptEncoder, Sam, TwoWayTransformer
+from .modeling import (
+    ImageEncoderViT,
+    MaskDecoder,
+    PromptEncoder,
+    Sam,
+    TwoWayTransformer,
+)
 
 
 def build_sam_vit_h(checkpoint=None):
@@ -18,7 +24,7 @@ def build_sam_vit_h(checkpoint=None):
         encoder_depth=32,
         encoder_num_heads=16,
         encoder_global_attn_indexes=[7, 15, 23, 31],
-        cate_num = 2,
+        cate_num=2,
         checkpoint=checkpoint,
     )
 
@@ -61,7 +67,7 @@ def _build_sam(
     encoder_depth,
     encoder_num_heads,
     encoder_global_attn_indexes,
-    cate_num = 2,
+    cate_num=2,
     checkpoint=None,
 ):
     prompt_embed_dim = 256
@@ -108,22 +114,22 @@ def _build_sam(
     sam.eval()
 
     if os.path.isfile(checkpoint):
-        print("loading from "+checkpoint)
+        print("loading from " + checkpoint)
         with open(checkpoint, "rb") as f:
             state_dict = torch.load(f)
         sam.load_state_dict(state_dict, strict=True)
     elif os.path.isdir(checkpoint):
         print("loading from " + checkpoint)
-        with open(os.path.join(checkpoint,"image_encoder.pth"),"rb") as f_encoder:
+        with open(os.path.join(checkpoint, "image_encoder.pth"), "rb") as f_encoder:
             state_dict_encoder = torch.load(f_encoder)
         sam.image_encoder.load_state_dict(state_dict_encoder, strict=True)
-        with open(os.path.join(checkpoint,"prompt_encoder.pth"),"rb") as f_prompt:
+        with open(os.path.join(checkpoint, "prompt_encoder.pth"), "rb") as f_prompt:
             state_dict_prompt = torch.load(f_prompt)
         sam.prompt_encoder.load_state_dict(state_dict_prompt, strict=True)
 
-        with open(os.path.join(checkpoint,"mask_decoder.pth"),"rb") as f_decoder:
+        with open(os.path.join(checkpoint, "mask_decoder.pth"), "rb") as f_decoder:
             state_dict_decoder = torch.load(f_decoder)
-        sam.mask_decoder.load_state_dict(state_dict_decoder,strict=False)
+        sam.mask_decoder.load_state_dict(state_dict_decoder, strict=False)
     else:
         print("no checkpoint is provided!")
 
