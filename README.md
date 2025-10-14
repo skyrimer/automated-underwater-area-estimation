@@ -43,7 +43,7 @@ On Windows, regardless if you have CUDA support or not, cpu-only version will be
 ```bash
 poetry source add --priority=explicit pytorch-cu129 https://download.pytorch.org/whl/cu129
 poetry add --group cuda --source pytorch-cu129 torch torchvision
-poetry install --with cuda --without cpu
+poetry install --with cuda
 ```
 and adjust the CUDA version accordingly.
 

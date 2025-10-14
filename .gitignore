@@ -213,3 +213,5 @@ data_preprocessed/
 evaluation_results/
 aquasam_weights.pth
 checkpoints/
+segformer_best/
+segformer_quad_preaug/
