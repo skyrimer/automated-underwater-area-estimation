@@ -8,7 +8,10 @@ from automated_underwater_area_estimation.preprocess_data.preprocess_IBF import 
 from automated_underwater_area_estimation.preprocess_data.preprocess_reefsupport import (
     process_all_reef_support_folders,
 )
-from automated_underwater_area_estimation.segmentation_corals.segmentation_evaluation import main as segmentation_evaluation
+from automated_underwater_area_estimation.segmentation_corals.segmentation_evaluation import (
+    main as segmentation_evaluation,
+)
+
 
 def main():
     package_name = "automated_underwater_area_estimation"
@@ -40,6 +43,7 @@ def main():
     # augment the masks
     # train the model
     # done
+
 
 if __name__ == "__main__":
     main()

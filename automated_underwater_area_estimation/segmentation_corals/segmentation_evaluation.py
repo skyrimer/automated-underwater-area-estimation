@@ -555,7 +555,9 @@ def main():
     pipeline = EvaluationPipeline()
 
     # Define datasets to evaluate on
-    reef_support_path = "./automated_underwater_area_estimation/data_preprocessed/reef_support"
+    reef_support_path = (
+        "./automated_underwater_area_estimation/data_preprocessed/reef_support"
+    )
     datasets = {
         reef_support_subfolder: os.path.join(reef_support_path, reef_support_subfolder)
         for reef_support_subfolder in os.listdir(reef_support_path)

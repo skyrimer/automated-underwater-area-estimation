@@ -16,7 +16,7 @@ from automated_underwater_area_estimation.segmentation_corals.coralscop.classmap
 from automated_underwater_area_estimation.segmentation_corals.model import (
     SegmentationModelBase,
 )
-from automated_underwater_area_estimation.segmentation_corals.utils import (
+from automated_underwater_area_estimation.utils import (
     get_best_device,
 )
 

@@ -351,7 +351,9 @@ def compute_mfb_weights(mask_paths: list[Path]) -> tuple[float, float]:
 
 if __name__ == "__main__":
     base_images = "./automated_underwater_area_estimation/data_preprocessed/IBF/"
-    base_checkpoints = "./automated_underwater_area_estimation/segmentation_quadrant/checkpoints/"
+    base_checkpoints = (
+        "./automated_underwater_area_estimation/segmentation_quadrant/checkpoints/"
+    )
     OUT_IMG_DIR = Path(f"{base_images}out_images")
     OUT_MASK_DIR = Path(f"{base_images}out_masks")
     SPLITS_DIR = Path(f"{base_images}splits")

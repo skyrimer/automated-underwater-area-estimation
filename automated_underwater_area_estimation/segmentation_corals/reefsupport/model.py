@@ -9,7 +9,7 @@ from automated_underwater_area_estimation.segmentation_corals.model import (
 from automated_underwater_area_estimation.segmentation_corals.reefsupport.classmap import (
     ReefSupportClassMapping,
 )
-from automated_underwater_area_estimation.segmentation_corals.utils import (
+from automated_underwater_area_estimation.utils import (
     get_best_device,
 )
 from ultralytics import YOLO
