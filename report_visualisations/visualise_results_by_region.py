@@ -17,6 +17,8 @@ def load_detailed_results(base_path):
 
     for file_path in detailed_files:
         print(f"Processing: {file_path}")
+        if "ReefSupport" in file_path.__str__():
+            continue
         try:
             with open(file_path, "r") as f:
                 for line in f:
@@ -39,14 +41,16 @@ def load_detailed_results(base_path):
 
 # Define regional groupings
 REGIONAL_GROUPS = {
-    "tropical_atlantic": [
+    "Caribbean": [
         "SEAFLOWER_BOLIVAR",
         "SEAFLOWER_COURTOWN",
-        "SEAVIEW_ATL",
         "TETES_PROVIDENCIA",
+        "UNAL_BLEACHING_TAYRONA",
     ],
-    "central_indopacific": ["SEAVIEW_IDN_PHL", "SEAVIEW_PAC_AUS"],
-    "northern_pacific": ["SEAVIEW_PAC_USA"],
+    "Atlantic (non-Caribbean)": ["SEAVIEW_ATL"],
+    "Indo-Pacific": ["SEAVIEW_IDN_PHL"],
+    "Pacific – Australia": ["SEAVIEW_PAC_AUS"],
+    "Pacific – USA": ["SEAVIEW_PAC_USA"],
 }
 
 
@@ -66,9 +70,7 @@ def add_regional_grouping(df):
 
 
 # Load all detailed results
-base_directory = (
-    r".\automated_underwater_area_estimation\evaluation_results_vm\evaluation_results"
-)
+base_directory = r".\automated_underwater_area_estimation\evaluation_results"
 detailed_results = load_detailed_results(base_directory)
 
 
@@ -118,7 +120,7 @@ for metric in metric_columns:
     mean_col = f"{metric}_mean"
     std_col = f"{metric}_std"
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(20, 6))
 
     # Prepare data for plotting
     regions = []
@@ -208,5 +210,3 @@ print(f"\nRegional statistics saved to: {output_file}")
 detailed_output_file = "./report_visualisations/detailed_results_with_regions.csv"
 df.to_csv(detailed_output_file, index=False)
 print(f"Detailed results with regional groupings saved to: {detailed_output_file}")
-
-# %%

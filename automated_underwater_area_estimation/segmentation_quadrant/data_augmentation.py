@@ -21,15 +21,13 @@ OUT_MASK_DIR = base + "out_masks"
 IMG_EXTS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp"}
 
 # Keep your fixed angles, but we’ll also apply richer random augs per angle
-# ANGLES: Sequence[int | float] = [0, 15, -15, 30, -30, 45, -45]
 ANGLES: Sequence[int | float] = [0, 15, -15]
 EXPAND = False  # rotation is handled via Albumentations w/ border fill
 
 # How many randomized augmentations to generate per fixed angle
-AUGS_PER_ANGLE = 2  # e.g., 2 variants for each angle
+AUGS_PER_ANGLE = 5
 
 # Output size (downscale from 4000x3000 to something manageable for training)
-# If None, keep original size; otherwise (W, H)
 OUTPUT_SIZE: Optional[Tuple[int, int]] = (800, 600)
 
 # Set a non-black border for visibility or keep black
@@ -57,18 +55,6 @@ def load_mask_pt(path: str) -> torch.Tensor:
         t = t > 0.5 if t.dtype.is_floating_point else t.bool()
         return t
     raise ValueError(f"Unsupported mask format in {path}: {type(t)}")
-
-
-def pil_to_cv2(img: Image.Image) -> np.ndarray:
-    """PIL RGB -> OpenCV BGR uint8"""
-    arr = np.asarray(img.convert("RGB"))
-    return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-
-
-def cv2_to_pil(img_bgr: np.ndarray) -> Image.Image:
-    """OpenCV BGR -> PIL RGB"""
-    rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    return Image.fromarray(rgb)
 
 
 def mask_to_cv2(mask: torch.Tensor) -> np.ndarray:
@@ -100,9 +86,9 @@ def make_rotation_only(angle: float) -> A.BasicTransform:
         limit=(angle, angle),
         interpolation=cv2.INTER_LINEAR,
         border_mode=cv2.BORDER_CONSTANT,
-        value=BORDER_VALUE_IMG,
-        mask_value=BORDER_VALUE_MASK,
-        always_apply=True,
+        fill=BORDER_VALUE_IMG,
+        fill_mask=BORDER_VALUE_MASK,
+        p=1,
     )
 
 
@@ -115,17 +101,17 @@ def make_random_pipeline(
     """
     # If the quadrant is usually near center: bias crops to center most of the time.
     center_crop_prob = 0
-
+    scale_factor = 0.1
     transforms = [
         # Small random affine jitter around the fixed angle rotation
-        A.ShiftScaleRotate(
-            shift_limit=0.05,  # +/- 5% translate
-            scale_limit=0.15,  # +/- 15% scale
-            rotate_limit=3,  # tiny extra rotation jitter
+        A.Affine(
+            translate_percent={"x": 0.05, "y": 0.05},
+            scale=(1 - scale_factor, 1 + scale_factor),
+            rotate=(-3, 3),
             interpolation=cv2.INTER_LINEAR,
             border_mode=cv2.BORDER_CONSTANT,
-            value=BORDER_VALUE_IMG,
-            mask_value=BORDER_VALUE_MASK,
+            fill=BORDER_VALUE_IMG,
+            fill_mask=BORDER_VALUE_MASK,
             p=0.9,
         ),
         A.HorizontalFlip(p=0.5),
@@ -143,22 +129,16 @@ def make_random_pipeline(
             ],
             p=0.25,
         ),
-        A.GaussNoise(var_limit=(5.0, 25.0), p=0.3),
+        A.GaussNoise(std_range=(0.05, 0.2), p=0.3),
         # Random occlusions (simulate sea creatures/algae covering edges)
         A.CoarseDropout(
-            max_holes=6,
-            max_height=0.1,
-            max_width=0.1,
-            min_holes=1,
-            min_height=0.03,
-            min_width=0.03,
-            fill_value=BORDER_VALUE_IMG,
-            mask_fill_value=0,
+            num_holes_range=(1, 6),
+            hole_height_range=(int(0.03 * image_size[1]), int(0.10 * image_size[1])),
+            hole_width_range=(int(0.03 * image_size[0]), int(0.10 * image_size[0])),
+            fill=BORDER_VALUE_IMG,
+            fill_mask=0,
             p=0.35,
         ),
-        # Cropping strategy:
-        # mostly center crop (quadrant near center), sometimes random resized crop
-        # Calculate actual pixel dimensions if image_size is provided
     ]
 
     if center_crop_prob > 0 and image_size is not None:
@@ -215,6 +195,7 @@ def main():
     out_img_dir.mkdir(parents=True, exist_ok=True)
     out_mask_dir.mkdir(parents=True, exist_ok=True)
 
+    # List image files
     img_files = [p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXTS]
     img_files.sort()
 
@@ -227,7 +208,7 @@ def main():
         f"Fixed rotations: {ANGLES} | Augs per angle: {AUGS_PER_ANGLE} | Output size: {OUTPUT_SIZE}"
     )
 
-    # Pre-build per-angle fixed rotation transforms (albumentations)
+    # Pre-build rotation and random transforms
     rot_xforms = {float(a): make_rotation_only(float(a)) for a in ANGLES}
     rand_xform = make_random_pipeline(OUTPUT_SIZE)
 
@@ -240,43 +221,47 @@ def main():
             )
             continue
 
-        # Load image & mask
-        pil_img = Image.open(img_path).convert("RGB")
+        # Load image as BGR uint8 via OpenCV
+        img_bgr = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
+        if img_bgr is None:
+            print(f"[ERROR] Could not read image {img_path}. Skipping.")
+            continue
+
+        # Load the mask from .pt
         mask_t = load_mask_pt(str(mask_path))  # torch.bool (H, W)
+        # Convert mask to uint8 with {0,255}, with shape (H, W, 1)
+        mask_np = mask_to_cv2(mask_t)
 
-        # Convert to albumentations-friendly formats
-        img_cv = pil_to_cv2(pil_img)
-        mask_cv = mask_to_cv2(mask_t)  # uint8 {0,255}
-
+        # --- AUGMENT & SAVE ---
         for angle in ANGLES:
-            # 1) Deterministic rotation (exactly your chosen angle)
-            out1 = rot_xforms[float(angle)](image=img_cv, mask=mask_cv)
+            out1 = rot_xforms[float(angle)](image=img_bgr, mask=mask_np)
             base_img = out1["image"]
             base_mask = out1["mask"]
 
-            # 2) Now produce N randomized variants per angle
             for k in range(AUGS_PER_ANGLE):
                 out2 = rand_xform(image=base_img, mask=base_mask)
                 aug_img = out2["image"]
                 aug_mask = out2["mask"]
 
-                # Convert back to PIL / torch.bool
-                pil_out = cv2_to_pil(aug_img)
+                # Convert aug_img (BGR) to PIL for saving (RGB)
+                rgb = cv2.cvtColor(aug_img, cv2.COLOR_BGR2RGB)
+                pil_out = Image.fromarray(rgb)
+
+                # Convert mask for saving
                 mask_out = cv2_to_mask(aug_mask)
 
+                # Build filenames
                 angle_tag = f"rot{int(angle):+03d}".replace("+", "")
                 out_img_name = f"{stem}_{angle_tag}_aug{k:02d}.jpg"
                 out_mask_name = f"{stem}_{angle_tag}_aug{k:02d}.pt"
 
+                # Save image — using PIL (you could also use cv2.imwrite)
                 if pil_out.mode != "RGB":
                     pil_out = pil_out.convert("RGB")
-
                 pil_out.save(out_img_dir / out_img_name, quality=95, subsampling=1)
+
+                # Save mask tensor
                 torch.save(mask_out, out_mask_dir / out_mask_name)
-
-        print(f"Augmented {img_path.name} -> {len(ANGLES) * AUGS_PER_ANGLE} samples")
-
-    print("Done.")
 
 
 if __name__ == "__main__":

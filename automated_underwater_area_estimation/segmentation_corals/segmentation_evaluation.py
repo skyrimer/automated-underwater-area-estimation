@@ -250,14 +250,6 @@ class EvaluationPipeline:
                         .squeeze()
                         .bool()
                     )
-                # Run inference
-                # pred_image, pred_mask = model.segment_image(image, adjust_size=True)
-                # target_height, target_width = pred_image.size
-                # gt_mask = F.interpolate(
-                #     gt_mask.unsqueeze(0).unsqueeze(0).float(),  # Add batch and channel dims, convert to float
-                #     size=(target_height, target_width),  # Note: interpolate expects (height, width)
-                #     mode='nearest'
-                # ).squeeze().bool()
 
                 # Compute metrics
                 metrics = compute_segmentation_metrics(
@@ -559,22 +551,14 @@ class EvaluationPipeline:
         print(f"{'=' * 60}")
 
 
-# Usage example - evaluate on multiple datasets
 def main():
-    # Initialize evaluation pipeline
     pipeline = EvaluationPipeline()
 
     # Define datasets to evaluate on
+    reef_support_path = "./automated_underwater_area_estimation/data_preprocessed/reef_support"
     datasets = {
-        # "coralscop_test": "./automated_underwater_area_estimation/data_preprocessed/coralscop/test",
-        "SEAFLOWER_BOLIVAR": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAFLOWER_BOLIVAR",
-        "SEAFLOWER_COURTOWN": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAFLOWER_COURTOWN",
-        "SEAVIEW_ATL": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_ATL",
-        "SEAVIEW_IDN_PHL": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_IDN_PHL",
-        "SEAVIEW_PAC_AUS": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_PAC_AUS",
-        "SEAVIEW_PAC_USA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/SEAVIEW_PAC_USA",
-        "TETES_PROVIDENCIA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/TETES_PROVIDENCIA",
-        "UNAL_BLEACHING_TAYRONA": "./automated_underwater_area_estimation/data_preprocessed/reef_support/UNAL_BLEACHING_TAYRONA",
+        reef_support_subfolder: os.path.join(reef_support_path, reef_support_subfolder)
+        for reef_support_subfolder in os.listdir(reef_support_path)
     }
 
     # Evaluate on each dataset

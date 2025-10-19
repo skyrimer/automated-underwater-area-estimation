@@ -1,0 +1,1 @@
+# Here will be the model to use for quadrant segmentation
