@@ -16,7 +16,7 @@ CPCS_DIR = BASE / "cpcs"
 OUTPUT_CSV = Path(__file__).parent / "quadrant_points.csv"
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp"}
 
-QUADRANT_WIDTH, QUADRANT_HEIGHT = 52, 52
+QUADRANT_WIDTH, QUADRANT_HEIGHT = 52.5, 52.5
 
 # -------------------
 # CPC parsing helpers

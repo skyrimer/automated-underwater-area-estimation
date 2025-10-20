@@ -47,7 +47,7 @@ class Evaluator:
 
             # segmentation & estimation
             mask = self.model.segment_image(image)
-            pred_area = median_band_average_from_cm_ratio(mask, 54, 54)
+            pred_area = median_band_average_from_cm_ratio(mask, 54, 54, 0.08)
             gt_area = float(row["pixel_area_gt_cm^2"])
             abs_err = abs(pred_area - gt_area)
             rel_err = abs_err / gt_area if gt_area != 0 else float("nan")
@@ -87,9 +87,9 @@ class Evaluator:
 
         # optional: print per‐image results
         for _, row in results_df.iterrows():
-            print(f"{row['image_path']} | pred: {row['pred_area_cm2']:.2f} cm² | "
-                  f"gt: {row['gt_area_cm2']:.2f} cm² | abs_err: {row['abs_error_cm2']:.2f} | "
-                  f"rel_err: {row['rel_error_fraction']*100:.1f}%")
+            print(f"{row['image_path']} | pred: {row['pred_area_cm2']:.4f} cm² | "
+                  f"gt: {row['gt_area_cm2']:.4f} cm² | abs_err: {row['abs_error_cm2']:.4f} | "
+                  f"rel_err: {row['rel_error_fraction']*100:.2f}%")
 
         print("SUMMARY:", summary)
         return summary
