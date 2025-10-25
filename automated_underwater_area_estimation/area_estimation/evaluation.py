@@ -8,7 +8,7 @@ from automated_underwater_area_estimation.segmentation_quadrant.model import (
     QuadrantSegmentationModel,
 )
 from automated_underwater_area_estimation.area_estimation.area_estimation import (
-    median_band_average_from_cm_ratio,
+    estimate_area_using_quadrant,
 )
 
 
@@ -46,7 +46,7 @@ class Evaluator:
 
             # segmentation & estimation
             mask = self.model.segment_image(image)
-            pred_area = median_band_average_from_cm_ratio(mask, 54, 54, 0.08)
+            pred_area = estimate_area_using_quadrant(mask, 54, 54, 0.08)
             gt_area = float(row["pixel_area_gt_cm^2"])
             abs_err = abs(pred_area - gt_area)
             rel_err = abs_err / gt_area if gt_area != 0 else float("nan")

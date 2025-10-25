@@ -185,9 +185,7 @@ def pix_to_cm_square(m_or_path, width_side=53, height_side=53):
     return distances
 
 
-def median_band_average_from_cm_ratio(
-    m_or_path, quadrant_width, quadrant_height, pct=0.08
-):
+def estimate_area_using_quadrant(m_or_path, quadrant_width, quadrant_height, pct=0.08):
     """
     Return the average of values within [median - pct*median, median + pct*median].
     m_or_path: mask path or tensor.
