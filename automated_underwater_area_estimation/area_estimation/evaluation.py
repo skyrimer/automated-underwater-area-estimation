@@ -7,9 +7,10 @@ from typing import List, Tuple, Dict
 from automated_underwater_area_estimation.segmentation_quadrant.model import (
     QuadrantSegmentationModel,
 )
-from automated_underwater_area_estimation.area_estimation.quadrant_setup.area_estimation import (
+from automated_underwater_area_estimation.area_estimation.area_estimation import (
     median_band_average_from_cm_ratio,
 )
+
 
 class Evaluator:
     def __init__(
@@ -28,9 +29,7 @@ class Evaluator:
         self.model = QuadrantSegmentationModel()
 
     def evaluate_and_save(
-        self,
-        output_csv_path: Path,
-        save_predictions: bool = True
+        self, output_csv_path: Path, save_predictions: bool = True
     ) -> Dict[str, float]:
         """
         Runs evaluation over all rows, computes summary metrics,
@@ -55,7 +54,13 @@ class Evaluator:
             results.append((str(img_path), pred_area, gt_area, abs_err, rel_err))
 
         # build DataFrame of per‐image results
-        cols = ["image_path", "pred_area_cm2", "gt_area_cm2", "abs_error_cm2", "rel_error_fraction"]
+        cols = [
+            "image_path",
+            "pred_area_cm2",
+            "gt_area_cm2",
+            "abs_error_cm2",
+            "rel_error_fraction",
+        ]
         results_df = pd.DataFrame(results, columns=cols)
 
         if save_predictions:
@@ -64,35 +69,42 @@ class Evaluator:
 
         # summary metrics
         preds = results_df["pred_area_cm2"].to_numpy(dtype=float)
-        gts   = results_df["gt_area_cm2"].to_numpy(dtype=float)
+        gts = results_df["gt_area_cm2"].to_numpy(dtype=float)
         abs_errors = results_df["abs_error_cm2"].to_numpy(dtype=float)
         rel_errors = results_df["rel_error_fraction"].to_numpy(dtype=float)
 
-        mae           = float(np.mean(abs_errors))
-        rmse          = float(np.sqrt(np.mean((preds - gts)**2)))
-        bias          = float(np.mean(preds - gts))
-        r2            = 1.0 - (np.sum((preds - gts)**2) / np.sum((gts - np.mean(gts))**2)) if gts.size > 1 else float("nan")
-        mean_rel_err  = float(np.nanmean(rel_errors))
-        median_rel_err= float(np.nanmedian(rel_errors))
+        mae = float(np.mean(abs_errors))
+        rmse = float(np.sqrt(np.mean((preds - gts) ** 2)))
+        bias = float(np.mean(preds - gts))
+        r2 = (
+            1.0 - (np.sum((preds - gts) ** 2) / np.sum((gts - np.mean(gts)) ** 2))
+            if gts.size > 1
+            else float("nan")
+        )
+        mean_rel_err = float(np.nanmean(rel_errors))
+        median_rel_err = float(np.nanmedian(rel_errors))
 
         summary = {
-            "N_samples"           : int(len(gts)),
-            "MAE_cm2"             : mae,
-            "RMSE_cm2"            : rmse,
-            "Bias_cm2"            : bias,
-            "R2"                  : r2,
+            "N_samples": int(len(gts)),
+            "MAE_cm2": mae,
+            "RMSE_cm2": rmse,
+            "Bias_cm2": bias,
+            "R2": r2,
             "MeanRelError_fraction": mean_rel_err,
             "MedianRelError_fraction": median_rel_err,
         }
 
         # optional: print per‐image results
         for _, row in results_df.iterrows():
-            print(f"{row['image_path']} | pred: {row['pred_area_cm2']:.4f} cm² | "
-                  f"gt: {row['gt_area_cm2']:.4f} cm² | abs_err: {row['abs_error_cm2']:.4f} | "
-                  f"rel_err: {row['rel_error_fraction']*100:.2f}%")
+            print(
+                f"{row['image_path']} | pred: {row['pred_area_cm2']:.4f} cm² | "
+                f"gt: {row['gt_area_cm2']:.4f} cm² | abs_err: {row['abs_error_cm2']:.4f} | "
+                f"rel_err: {row['rel_error_fraction']*100:.2f}%"
+            )
 
         print("SUMMARY:", summary)
         return summary
+
 
 if __name__ == "__main__":
     csv_path = Path(__file__).parent / "quadrant_points.csv"
@@ -101,4 +113,6 @@ if __name__ == "__main__":
         image_root=None,
     )
     out_csv = Path(__file__).parent / "quadrant_predictions.csv"
-    summary = evaluator.evaluate_and_save(output_csv_path=out_csv, save_predictions=True)
+    summary = evaluator.evaluate_and_save(
+        output_csv_path=out_csv, save_predictions=True
+    )

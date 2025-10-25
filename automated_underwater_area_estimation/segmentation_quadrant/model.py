@@ -20,7 +20,9 @@ class QuadrantSegmentationModel:
         device = device or get_best_device()
         self.device = torch.device(device)
         checkpoint_dir = Path(__file__).parent / "segformer_best"
-        assert  checkpoint_dir.exists(), "Model checkpoint not found. Check that you have loaded the weights"
+        assert (
+            checkpoint_dir.exists()
+        ), "Model checkpoint not found. Check that you have loaded the weights"
         self.processor = AutoImageProcessor.from_pretrained(checkpoint_dir)
         self.model = (
             SegformerForSemanticSegmentation.from_pretrained(checkpoint_dir)
