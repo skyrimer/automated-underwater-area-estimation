@@ -20,7 +20,21 @@ EPS = 1e-6
 
 
 def load_mask_pt(path: str) -> torch.Tensor:
-    """Return torch.bool (H,W)."""
+    """
+    Load a binary mask from a .pt file and return as boolean tensor.
+    
+    Handles masks stored as tensors or dictionaries with a 'mask' key.
+    Converts multi-channel or 3D masks to 2D boolean tensors.
+    
+    Args:
+        path: Path to .pt file containing the mask
+        
+    Returns:
+        Boolean torch.Tensor of shape (H, W)
+        
+    Raises:
+        ValueError: If mask format is unsupported
+    """
     data = torch.load(path, map_location="cpu")
     t = data["mask"] if isinstance(data, dict) and "mask" in data else data
     if not isinstance(t, torch.Tensor):
@@ -34,6 +48,19 @@ def load_mask_pt(path: str) -> torch.Tensor:
 
 
 def discover_pairs(img_dir: Path, mask_dir: Path) -> List[Tuple[Path, Path]]:
+    """
+    Discover matching image-mask pairs from directories.
+    
+    Searches for images with common extensions and finds corresponding
+    mask files with the same stem name.
+    
+    Args:
+        img_dir: Directory containing images
+        mask_dir: Directory containing .pt mask files
+        
+    Returns:
+        Sorted list of (image_path, mask_path) tuples
+    """
     pairs = []
     for p in img_dir.iterdir():
         if p.suffix.lower() not in IMAGE_EXTS:
@@ -46,14 +73,35 @@ def discover_pairs(img_dir: Path, mask_dir: Path) -> List[Tuple[Path, Path]]:
 
 
 def _original_id(stem: str) -> str:
-    """ID that all augmented variants of the same original share."""
+    """
+    Extract the original image ID from an augmented filename.
+    
+    Removes augmentation suffixes (e.g., _rot-15_aug02) to get the base
+    image ID that all augmented variants share.
+    
+    Args:
+        stem: Filename stem (without extension)
+        
+    Returns:
+        Original image ID without augmentation suffixes
+    """
     augmentation_regex = re.compile(r"^(.*?)(?:_rot-?\d+_aug\d+)$")
     m = augmentation_regex.match(stem)
     return m.group(1) if m else stem
 
 
 def _dataset_id(stem: str) -> str:
-    """Prefix before the first underscore is the dataset label."""
+    """
+    Extract the dataset identifier from a filename stem.
+    
+    The dataset ID is the prefix before the first underscore.
+    
+    Args:
+        stem: Filename stem (without extension)
+        
+    Returns:
+        Dataset identifier string
+    """
     return stem.split("_", 1)[0] if "_" in stem else stem
 
 
@@ -131,7 +179,14 @@ def split_by_dataset_and_group(
     return train_pairs, val_pairs
 
 
-def save_split(stems: List[str], path: Path):
+def save_split(stems: List[str], path: Path) -> None:
+    """
+    Save a list of filename stems to a text file.
+    
+    Args:
+        stems: List of filename stems (one per line)
+        path: Path to output text file
+    """
     path.write_text("\n".join(stems) + "\n", encoding="utf-8")
 
 

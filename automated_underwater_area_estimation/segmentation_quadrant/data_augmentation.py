@@ -40,8 +40,19 @@ BORDER_VALUE_MASK = 0
 # ----------------------------
 def load_mask_pt(path: str) -> torch.Tensor:
     """
-    Load a binary mask saved as a .pt (torch tensor or dict with 'mask').
-    Returns torch.bool of shape (H, W).
+    Load a binary mask saved as a .pt file.
+    
+    Handles masks stored as torch tensors or dictionaries with a 'mask' key.
+    Converts the loaded data to a boolean tensor of shape (H, W).
+    
+    Args:
+        path: Path to the .pt file containing the mask
+        
+    Returns:
+        Boolean torch.Tensor of shape (H, W)
+        
+    Raises:
+        ValueError: If the mask format is unsupported
     """
     data = torch.load(path, map_location="cpu")
     if isinstance(data, dict) and "mask" in data:
@@ -59,8 +70,16 @@ def load_mask_pt(path: str) -> torch.Tensor:
 
 def mask_to_cv2(mask: torch.Tensor) -> np.ndarray:
     """
-    torch.bool (H,W) -> uint8 mask with explicit channel (H,W,1) for Albumentations.
-    Values are {0,255}.
+    Convert torch boolean mask to OpenCV-compatible uint8 format.
+    
+    Converts a torch boolean tensor to uint8 numpy array with shape (H, W, 1)
+    for use with Albumentations. Values are {0, 255}.
+    
+    Args:
+        mask: Boolean torch.Tensor of shape (H, W)
+        
+    Returns:
+        Uint8 numpy array of shape (H, W, 1) with values in {0, 255}
     """
     m = mask.detach().cpu().numpy().astype(np.uint8) * 255
     if m.ndim == 2:
@@ -70,7 +89,16 @@ def mask_to_cv2(mask: torch.Tensor) -> np.ndarray:
 
 def cv2_to_mask(mask_u8: np.ndarray) -> torch.Tensor:
     """
-    (H,W) or (H,W,1) uint8 -> torch.bool (H,W).
+    Convert OpenCV uint8 mask back to torch boolean tensor.
+    
+    Converts a uint8 numpy array of shape (H, W) or (H, W, 1) to a
+    boolean torch.Tensor of shape (H, W).
+    
+    Args:
+        mask_u8: Uint8 numpy array of shape (H, W) or (H, W, 1)
+        
+    Returns:
+        Boolean torch.Tensor of shape (H, W)
     """
     if mask_u8.ndim == 3 and mask_u8.shape[-1] == 1:
         mask_u8 = mask_u8[..., 0]
@@ -81,7 +109,16 @@ def cv2_to_mask(mask_u8: np.ndarray) -> torch.Tensor:
 # AUGMENTATION PIPELINES
 # ----------------------------
 def make_rotation_only(angle: float) -> A.BasicTransform:
-    # Exact rotation to preserve your legacy “fixed angles”
+    """
+    Create an Albumentations transform for exact rotation at a fixed angle.
+    
+    Args:
+        angle: Rotation angle in degrees
+        
+    Returns:
+        Albumentations Rotate transform configured for the specified angle
+    """
+    # Exact rotation to preserve your legacy "fixed angles"
     return A.Rotate(
         limit=(angle, angle),
         interpolation=cv2.INTER_LINEAR,
@@ -186,7 +223,14 @@ def make_random_pipeline(
     )
 
 
-def main():
+def main() -> None:
+    """
+    Main function to perform data augmentation on images and masks.
+    
+    Applies fixed rotations and random augmentations to create an augmented dataset
+    suitable for training segmentation models. Reads images and masks from configured
+    directories and saves augmented versions to output directories.
+    """
     img_dir = Path(IMG_DIR)
     mask_dir = Path(MASK_DIR)
     out_img_dir = Path(OUT_IMG_DIR)

@@ -51,7 +51,18 @@ class ReefSupportModel(SegmentationModelBase):
 
     @staticmethod
     def download_model(model_name: str) -> str:
-        """Download a ReefSupport model if it doesn't exist locally in the same directory as the model file."""
+        """
+        Download a ReefSupport model if it doesn't exist locally.
+        
+        Downloads the model from HuggingFace repository and saves it to the
+        checkpoints directory in the same directory as this model file.
+        
+        Args:
+            model_name: Name of the model file to download
+            
+        Returns:
+            String path to the downloaded (or existing) model file
+        """
 
         # Get the directory where the model.py file is located
         current_file_dir = Path(__file__).parent
@@ -77,7 +88,14 @@ class ReefSupportModel(SegmentationModelBase):
 
     def resize_image(self, image: Image.Image, target_size: int = 1024) -> Image.Image:
         """
-        Used to resize the image such that the smaller side equals target_size
+        Resize image maintaining aspect ratio with smaller dimension equal to target_size.
+        
+        Args:
+            image: Input PIL Image to resize
+            target_size: Target size for the smaller dimension (default: 1024)
+            
+        Returns:
+            Resized PIL Image with smaller dimension equal to target_size
         """
         w_img, h_img = image.size  # PIL format: (width, height)
         if w_img < h_img:

@@ -47,8 +47,22 @@ CLICKS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @st.cache_resource
-def load_model(checkpoint_path=CHECKPOINT_PATH, sam_variant=SAM_VARIANT):
-    """Load AquaSAM model (cached)"""
+def load_model(
+    checkpoint_path: str = CHECKPOINT_PATH, sam_variant: str = SAM_VARIANT
+) -> Tuple[Any, Any, str]:
+    """
+    Load AquaSAM model with caching.
+    
+    Initializes the Segment Anything Model (SAM) with AquaSAM weights
+    fine-tuned for underwater imagery. Uses Streamlit caching for efficiency.
+    
+    Args:
+        checkpoint_path: Path to AquaSAM checkpoint file
+        sam_variant: SAM model variant (e.g., 'vit_b')
+        
+    Returns:
+        Tuple of (sam_model, predictor, device_name)
+    """
     device = (
         "cuda"
         if torch.cuda.is_available()
@@ -120,8 +134,16 @@ def upscale_mask_to_original(mask: torch.Tensor, target_size: tuple) -> torch.Te
     return upscaled_mask
 
 
-def get_unlabeled_images():
-    """Get list of unlabeled images"""
+def get_unlabeled_images() -> Tuple[List[Path], set]:
+    """
+    Get lists of unlabeled and labeled images.
+    
+    Scans the images directory and checks which images already have
+    corresponding mask files in the masks directory.
+    
+    Returns:
+        Tuple of (unlabeled_images_list, labeled_images_set)
+    """
     all_images = sorted(
         [f for f in IMAGES_DIR.glob("*.JPG") if f.is_file()]
         + [f for f in IMAGES_DIR.glob("*.jpg") if f.is_file()]
@@ -138,8 +160,24 @@ def get_unlabeled_images():
     return unlabeled, labeled
 
 
-def segment_object_from_clicks(image, clicks, predictor, device):
-    """Segment an object from an image using AquaSAM model with multiple click points."""
+def segment_object_from_clicks(
+    image: Image.Image, clicks: list, predictor: Any, device: str
+) -> Optional[torch.Tensor]:
+    """
+    Segment an object from an image using AquaSAM with multiple click points.
+    
+    Uses the Segment Anything Model to generate a segmentation mask based on
+    user-provided positive and negative click points.
+    
+    Args:
+        image: PIL Image to segment
+        clicks: List of (x, y, label) tuples where label is 1 (positive) or 0 (negative)
+        predictor: SAM predictor instance
+        device: Device name (e.g., 'cuda', 'cpu')
+        
+    Returns:
+        Boolean tensor mask of shape (H, W), or None if no clicks provided
+    """
     if len(clicks) == 0:
         return None
 

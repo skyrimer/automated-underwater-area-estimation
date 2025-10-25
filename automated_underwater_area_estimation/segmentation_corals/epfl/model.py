@@ -60,7 +60,14 @@ class EPFLModel(SegmentationModelBase):
 
     def resize_image(self, image: Image.Image, target_size: int = 1024) -> Image.Image:
         """
-        Used to resize the image such that the smaller side equals target_size
+        Resize image maintaining aspect ratio with smaller dimension equal to target_size.
+        
+        Args:
+            image: Input PIL Image to resize
+            target_size: Target size for the smaller dimension (default: 1024)
+            
+        Returns:
+            Resized PIL Image with smaller dimension equal to target_size
         """
         w_img, h_img = image.size  # PIL format: (width, height)
         if w_img < h_img:

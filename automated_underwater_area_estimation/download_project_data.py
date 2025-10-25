@@ -10,8 +10,18 @@ import os
 from tqdm.auto import tqdm
 
 
-def download_gcs_folder(bucket_name, source_folder, destination_folder):
-    """Download all files from a GCS folder to local directory."""
+def download_gcs_folder(bucket_name: str, source_folder: str, destination_folder: str) -> None:
+    """
+    Download all files from a Google Cloud Storage (GCS) folder to local directory.
+    
+    Connects to a public GCS bucket anonymously and downloads all files
+    from the specified folder prefix to the local destination.
+    
+    Args:
+        bucket_name: Name of the GCS bucket
+        source_folder: Folder prefix in the bucket to download from
+        destination_folder: Local directory path to save downloaded files
+    """
 
     # Initialize client (no authentication needed for public buckets)
     client = storage.Client.create_anonymous_client()
@@ -42,7 +52,13 @@ def download_gcs_folder(bucket_name, source_folder, destination_folder):
     print("Download completed!")
 
 
-def main():
+def main() -> None:
+    """
+    Main function to download and preprocess project data.
+    
+    Downloads IBF and reef_support datasets from GCS bucket,
+    then preprocesses them into the required format.
+    """
     package_name = "automated_underwater_area_estimation"
     bucket = "rs_storage_open"
     gcs_folders = [

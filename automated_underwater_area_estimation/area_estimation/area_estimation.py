@@ -83,11 +83,18 @@ def find_four_points(
 
 
 # Computing distance
-def compute_distances(m_or_path):
+def compute_distances(m_or_path: Union[str, torch.Tensor, np.ndarray]) -> Dict[str, float]:
     """
-    Given points dict with keys {'TL','TR','BR','BL'} -> (y,x),
-    return Euclidean distances (pixels) for:
+    Compute Euclidean distances between four corner points of a quadrant mask.
+    
+    Given a mask, finds the four corner points and returns distances (in pixels) between:
       TR–TL, TR–BR, TL–BL, BR–BL, TL–BR, TR–BL.
+    
+    Args:
+        m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
+        
+    Returns:
+        Dictionary mapping distance names to pixel values
     """
     points = find_four_points(m_or_path)
 
@@ -109,7 +116,16 @@ def compute_distances(m_or_path):
 def plot_points_and_distances(
     m_or_path: Union[str, torch.Tensor, np.ndarray], points: Dict[str, Tuple[int, int]]
 ) -> None:
-    """Overlay TL/TR/BR/BL and requested segments with labels on the mask."""
+    """
+    Visualize quadrant corner points and distance measurements on the mask.
+    
+    Creates a plot showing the mask with corner points (TL, TR, BR, BL) annotated
+    and lines connecting them with distance labels.
+    
+    Args:
+        m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
+        points: Dictionary mapping corner labels ('TL', 'TR', 'BR', 'BL') to (y, x) coordinates
+    """
     m = to_mask2d(m_or_path)
     H, W = m.shape
     fig, ax = plt.subplots(figsize=(8, 8 * H / W))
@@ -165,7 +181,25 @@ def plot_points_and_distances(
     plt.show()
 
 
-def pix_to_cm_square(m_or_path, width_side=53, height_side=53):
+def pix_to_cm_square(
+    m_or_path: Union[str, torch.Tensor, np.ndarray],
+    width_side: float = 53,
+    height_side: float = 53
+) -> Dict[str, float]:
+    """
+    Convert pixel distances to squared cm/pixel ratios for area estimation.
+    
+    Computes the ratio (real_size / pixel_size)^2 for each distance measurement,
+    which can be used to estimate pixel area in cm².
+    
+    Args:
+        m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
+        width_side: Real-world width of quadrant in cm
+        height_side: Real-world height of quadrant in cm
+        
+    Returns:
+        Dictionary mapping distance names to squared cm/pixel ratios
+    """
     distances = compute_distances(m_or_path).copy()
 
     # Calculate diagonal using Pythagorean theorem
@@ -185,11 +219,26 @@ def pix_to_cm_square(m_or_path, width_side=53, height_side=53):
     return distances
 
 
-def estimate_area_using_quadrant(m_or_path, quadrant_width, quadrant_height, pct=0.08):
+def estimate_area_using_quadrant(
+    m_or_path: Union[str, torch.Tensor, np.ndarray],
+    quadrant_width: float,
+    quadrant_height: float,
+    pct: float = 0.08
+) -> float:
     """
-    Return the average of values within [median - pct*median, median + pct*median].
-    m_or_path: mask path or tensor.
-    pct: fraction for tolerance (e.g., 0.08 for 8%).
+    Estimate projected area per pixel (PAE) using quadrant measurements.
+    
+    Computes multiple distance measurements from the quadrant corners,
+    filters outliers, and returns the average area per pixel in cm².
+    
+    Args:
+        m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
+        quadrant_width: Real-world width of quadrant in cm
+        quadrant_height: Real-world height of quadrant in cm
+        pct: Tolerance fraction for outlier filtering (e.g., 0.08 for 8%)
+        
+    Returns:
+        Average projected area estimate in cm² per pixel
     """
     distances = pix_to_cm_square(m_or_path, quadrant_width, quadrant_height)
     vals = list(distances.values())

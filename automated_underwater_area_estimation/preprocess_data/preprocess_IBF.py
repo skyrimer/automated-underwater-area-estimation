@@ -3,8 +3,19 @@ import shutil
 from pathlib import Path
 
 
-def parse_cpc_file(cpc_path):
-    """Parse CPC file and extract the referenced image filename."""
+def parse_cpc_file(cpc_path: str) -> Optional[str]:
+    """
+    Parse CPC file and extract the referenced image filename.
+    
+    Reads the first line of a CPC file and extracts the image filename
+    from the second comma-separated field.
+    
+    Args:
+        cpc_path: Path to the CPC file to parse
+        
+    Returns:
+        Base filename of the referenced image, or None if parsing fails
+    """
     try:
         with open(cpc_path, "r", encoding="utf-8") as f:
             first_line = f.readline().strip()
@@ -20,7 +31,7 @@ def parse_cpc_file(cpc_path):
     return None
 
 
-def copy_images_and_cpcs(source_folder, dest_folder):
+def copy_images_and_cpcs(source_folder: str, dest_folder: str) -> None:
     """
     Copy images and CPC files from source to destination,
     organizing them into 'images' and 'cpcs' subfolders.

@@ -27,6 +27,18 @@ NUMS_RE = re.compile(rf"{FLOAT}")
 
 
 def _read_text(path: Path) -> str:
+    """
+    Read text file with multiple encoding fallbacks.
+    
+    Attempts to read the file using UTF-8-sig and latin-1 encodings,
+    with a final fallback to UTF-8 with error ignoring.
+    
+    Args:
+        path: Path to text file to read
+        
+    Returns:
+        Content of the file as a string
+    """
     # tolerant file reader (handles UTF-8 BOM / latin-1)
     for enc in ("utf-8-sig", "latin-1"):
         try:
@@ -96,6 +108,17 @@ def parse_cpc(
 # Image lookup
 # -------------------
 def find_image_for_stem(stem: str) -> Optional[Path]:
+    """
+    Find an image file matching the given stem (filename without extension).
+    
+    Searches for image files with common extensions in a case-insensitive manner.
+    
+    Args:
+        stem: Filename without extension to search for
+        
+    Returns:
+        Path to the matching image file, or None if not found
+    """
     # try common extensions (case-insensitive)
     for ext in IMAGE_EXTS:
         p = IMAGES_DIR / f"{stem}{ext}"
@@ -119,6 +142,18 @@ def find_image_for_stem(stem: str) -> Optional[Path]:
 # Build DF + overlays
 # -------------------
 def build_quadrant_df_and_overlays() -> pd.DataFrame:
+    """
+    Build a DataFrame with quadrant corner coordinates from CPC files.
+    
+    Parses all CPC files in the configured directory, extracts ROI corner coordinates,
+    and creates a DataFrame with image paths and scaled pixel coordinates.
+    
+    Returns:
+        DataFrame with columns for stem, image_path, cpc_path, and corner coordinates (c1x, c1y, c2x, c2y, c3x, c3y, c4x, c4y)
+        
+    Raises:
+        SystemExit: If required directories (images or cpcs) are missing
+    """
     if not IMAGES_DIR.is_dir():
         raise SystemExit(f"Missing images dir: {IMAGES_DIR}")
     if not CPCS_DIR.is_dir():
@@ -200,11 +235,26 @@ def build_quadrant_df_and_overlays() -> pd.DataFrame:
     return df
 
 
-def dist_px(x1, y1, x2, y2):
+def dist_px(
+    x1: Union[float, np.ndarray, pd.Series],
+    y1: Union[float, np.ndarray, pd.Series],
+    x2: Union[float, np.ndarray, pd.Series],
+    y2: Union[float, np.ndarray, pd.Series]
+) -> Union[float, np.ndarray, pd.Series]:
     """
-    Euclidean distance in *pixels* between points (x1,y1) and (x2,y2).
+    Euclidean distance in pixels between points (x1,y1) and (x2,y2).
+    
     Works with scalars, NumPy arrays, or pandas Series (vectorized).
     Uses np.hypot for numerical stability: sqrt(dx**2 + dy**2).
+    
+    Args:
+        x1: X-coordinate(s) of first point(s)
+        y1: Y-coordinate(s) of first point(s)
+        x2: X-coordinate(s) of second point(s)
+        y2: Y-coordinate(s) of second point(s)
+        
+    Returns:
+        Euclidean distance(s) in pixels
     """
     dx = np.asarray(x2) - np.asarray(x1)
     dy = np.asarray(y2) - np.asarray(y1)
