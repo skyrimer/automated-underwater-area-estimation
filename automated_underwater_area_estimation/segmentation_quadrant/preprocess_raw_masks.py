@@ -467,7 +467,7 @@ if __name__ == "__main__":
         out_plots_dir,
         save_as_pt=True,
         save_visualizations=True,
-        use_multiprocessing=True,  # Enable parallel processing
+        use_multiprocessing=True,
         num_workers=4,  # Auto-detect (cpu_count - 1)
         min_obj_frac=0.001,
         min_hole_frac=0.004,
