@@ -1,16 +1,45 @@
-from automated_underwater_area_estimation.download_gcs_bucket import (
-    download_gcs_folder,
-)
-
 from automated_underwater_area_estimation.preprocess_data.preprocess_IBF import (
     copy_images_and_cpcs,
 )
 from automated_underwater_area_estimation.preprocess_data.preprocess_reefsupport import (
     process_all_reef_support_folders,
 )
-from automated_underwater_area_estimation.segmentation_corals.segmentation_evaluation import (
-    main as segmentation_evaluation,
-)
+
+from google.cloud import storage
+import os
+from tqdm.auto import tqdm
+
+
+def download_gcs_folder(bucket_name, source_folder, destination_folder):
+    """Download all files from a GCS folder to local directory."""
+
+    # Initialize client (no authentication needed for public buckets)
+    client = storage.Client.create_anonymous_client()
+    bucket = client.bucket(bucket_name)
+
+    # List all blobs in the folder
+    blobs = bucket.list_blobs(prefix=source_folder)
+
+    os.makedirs(destination_folder, exist_ok=True)
+
+    for blob in tqdm(blobs):
+        # Skip if it's just a folder marker
+        if blob.name.endswith("/"):
+            continue
+
+        # Create local file path
+        local_file_path = os.path.join(
+            destination_folder, os.path.relpath(blob.name, source_folder)
+        )
+
+        # Create directory if it doesn't exist
+        local_dir = os.path.dirname(local_file_path)
+        os.makedirs(local_dir, exist_ok=True)
+
+        # Download the file
+        blob.download_to_filename(local_file_path)
+
+    print("Download completed!")
 
 
 def main():
@@ -37,7 +66,6 @@ def main():
         source_path=f"./{package_name}/data/reef_support",
         output_base_path=f"./{package_name}/data_preprocessed/reef_support",
     )
-    segmentation_evaluation()
     # Obtain masks for the IBF dataset
     # morphologically improve the masks
     # augment the masks

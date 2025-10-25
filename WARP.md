@@ -4,14 +4,19 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-This is a Python project for automated underwater area estimation using machine learning segmentation models. The project implements two different segmentation approaches: EPFL Segformer models for coral reef analysis and ReefSupport YOLO models for underwater object detection.
+Automated underwater area estimation system using deep learning segmentation models. The project performs two-stage analysis: (1) coral segmentation using EPFL Segformer models, and (2) quadrant detection for pixel-to-area conversion, enabling precise coral coverage measurements in cm².
 
 ## Development Commands
 
 ### Environment Setup
 ```bash
-# Install dependencies (Poetry manages both regular and dev dependencies)
+# Install dependencies (includes dev tools: black, pytest, jupyter, streamlit)
 poetry install
+
+# On Windows with CUDA support (adjust CUDA version as needed)
+poetry source add --priority=explicit pytorch-cu129 https://download.pytorch.org/whl/cu129
+poetry add --group cuda --source pytorch-cu129 torch torchvision
+poetry install --with cuda
 
 # Activate environment
 poetry shell
@@ -20,109 +25,197 @@ poetry shell
 poetry run <command>
 ```
 
-### Development Workflow
+### Core Workflow
 ```bash
-# Format code with Black
+# Format code with Black (auto-excludes data directories)
 poetry run black .
 
-# Run all tests
+# Run all tests with verbose output
 poetry run pytest
 
 # Run specific test file
-poetry run pytest tests/test_segmentation.py
+poetry run pytest tests/test_specific.py
 
-# Run tests with verbose output
-poetry run pytest -v
-
-# Run Jupyter notebook for experimentation
-poetry run jupyter notebook
-```
-
-### Single Test Execution
-```bash
-# Run a specific test method
-poetry run pytest tests/test_segmentation.py::TestSegmentationModels::test_epfl_model_loading_b2
+# Run specific test method
+poetry run pytest tests/test_file.py::TestClass::test_method
 
 # Run tests matching a pattern
-poetry run pytest -k "epfl_model"
+poetry run pytest -k "pattern"
 
 # Skip slow tests
 poetry run pytest -m "not slow"
+
+# Launch Jupyter for experimentation
+poetry run jupyter notebook
+
+# Run Streamlit apps (for interactive labeling/visualization)
+poetry run streamlit run <script.py>
+```
+
+### Main Pipeline Execution
+```bash
+# Process a single underwater image
+poetry run python automated_underwater_area_estimation/main.py <image_path>
+
+# With custom quadrant dimensions and verbose output
+poetry run python automated_underwater_area_estimation/main.py <image_path> --quadrant-width 54 --quadrant-height 54 --verbose
 ```
 
 ## Architecture Overview
 
-### Core Design Pattern
-The project uses an abstract base class architecture centered around `SegmentationModelBase` that enforces a consistent interface across different model implementations.
+### Two-Stage Processing Pipeline
 
-**Key architectural components:**
+The system operates in two independent stages:
 
-1. **Abstract Base Classes**: 
-   - `SegmentationModelBase`: Defines the contract for all segmentation models
-   - `ClassMappingBase`: Ensures consistent class mapping across datasets
+1. **Coral Segmentation** (`segmentation_corals/`)
+   - Abstract base: `SegmentationModelBase` defines interface for all coral segmentation models
+   - Implementation: `EPFLModel` wraps HuggingFace Segformer models (b2/b5 variants)
+   - Input: High-resolution underwater images (any size)
+   - Output: Binary mask identifying coral vs non-coral pixels
+   - Key feature: Sliding window inference for arbitrary image sizes (1024x1024 windows with 1.5x overlap factor)
 
-2. **Model Implementations**:
-   - `EPFLModel`: Wraps HuggingFace Segformer models for coral reef segmentation (1024x1024 input)
-   - `ReefSupportModel`: Wraps YOLO models for underwater object detection (640x640 input)
+2. **Quadrant Detection** (`segmentation_quadrant/`)
+   - Model: `QuadrantSegmentationModel` (fine-tuned Segformer)
+   - Input: Same underwater image
+   - Output: Binary mask of the sampling quadrant (reference frame)
+   - Preprocessing: Resizes to 800x600 during inference, then scales back to original size
+   - Purpose: Identifies the physical reference frame for pixel-to-cm² conversion
 
-3. **Dataset-Specific Class Mappings**:
-   - `EPFLClassMapping`: 39 classes for coral reef analysis (seagrass, coral types, fish, etc.)
-   - `ReefSupportClassMapping`: Classes for YOLO-based detection
+3. **Area Estimation** (`area_estimation/`)
+   - Combines both masks to compute coral coverage in cm²
+   - Algorithm: Extracts quadrant corners (TL/TR/BR/BL), computes pixel-to-cm² ratio via median filtering
+   - Output: PAE (Projected Area Estimate) - area per pixel in cm²
 
-### Model Factory Pattern
-Models are instantiated with specific pretrained weights:
-- **EPFL models**: `segformer-b2` and `segformer-b5` variants from HuggingFace
-- **ReefSupport models**: `yolov8_sm_latest.pt` and `yolov8_xlarge_latest.pt` with automatic download from HuggingFace
+### Class Mapping Architecture
 
-### Device Management
-All models implement automatic device detection with fallback priority:
-1. CUDA (NVIDIA GPUs)
+- `ClassMappingBase`: Abstract base enforcing validation rules (no duplicates, non-empty names)
+- `EPFLClassMapping`: 39 coral reef classes (seagrass, hard coral, soft coral, fish, sand, etc.)
+- Validation at initialization prevents invalid mappings from propagating through the system
+
+### Device Management Strategy
+
+All models use `get_best_device()` utility with priority:
+1. CUDA (NVIDIA) - prints GPU name and memory
 2. MPS (Apple Silicon)
-3. XPU (Intel GPUs) 
-4. CPU
+3. XPU (Intel)
+4. CPU - prints thread count
 
-Access via `get_best_device()` utility function.
+Force specific device via `force_device` parameter when needed.
 
-### Data Pipeline Architecture
-- **Input**: PIL Images
-- **Preprocessing**: Model-specific (HuggingFace transformers vs YOLO native)
-- **Output**: Tuple of (processed_image, segmentation_tensor)
-- **Postprocessing**: Class ID to name mapping via dataset-specific mappings
+### Sliding Window Inference (EPFLModel)
+
+High-resolution images are processed using overlapping windows:
+- Grid calculation: `h_grids = int(np.round(1.5 * h_img / h_crop))`
+- Stride computation ensures complete coverage
+- Logits accumulated with overlap counting
+- Final prediction: averaged across overlapping regions
+- No zero-coverage pixels allowed (assertion check)
 
 ## Key Implementation Details
 
-### Model Loading and Validation
-All models inherit validation that ensures required attributes are present:
-- `model_name`, `preprocessor`, `model`, `class_mapping`, `ideal_size`
-- Type validation for `ideal_size` (tuple of positive integers)
-- Interface validation for `class_mapping` (must inherit from `ClassMappingBase`)
+### Model Validation Contract
 
-### File Download System
-ReefSupport models implement automatic model weight downloading:
-- Downloads to `automated_underwater_area_estimation/segmentation/reefsupport/models/`
-- Uses torch.hub for reliable downloads
-- Checks for existing files to avoid re-downloading
+All `SegmentationModelBase` subclasses must define:
+- `model_name` (str): HuggingFace identifier or local path
+- `preprocessor`: Transforms PIL images to model inputs
+- `model`: Actual torch model
+- `class_mapping` (ClassMappingBase): Dataset-specific class definitions
+- `ideal_size` (Tuple[int, int]): Optimal input dimensions
 
-### Testing Architecture
-Comprehensive test suite using pytest with:
-- **Shared fixtures**: CoralScapes dataset loading in `setup_class`
-- **Parameterized tests**: Testing both model variants
-- **Integration tests**: Full pipeline from image to segmentation
-- **Validation tests**: Model attribute and interface checking
+Validation occurs in `__init__`, failing fast on missing/invalid attributes.
 
-### Data Access
-The project includes GCS bucket download functionality for accessing coral reef datasets, particularly the CoralScapes dataset used for training and evaluation.
+### Quadrant Corner Detection
 
-## Python Version Requirements
-- **Required**: Python 3.12 or higher (but less than 3.14)
-- Dependencies managed through Poetry with lock file for reproducible builds
+Algorithm in `area_estimation.py`:
+- **Top-Left**: Minimize (x+y) with x>0, y>0 constraint
+- **Top-Right**: Maximize (x-y), tie-break on largest x then smallest y
+- **Bottom-Left**: Maximize (y-x), tie-break on largest y then smallest x  
+- **Bottom-Right**: Maximize x*y
 
-## Dataset Context
-- **Primary**: CoralScapes dataset from EPFL-ECEO for coral reef analysis
-- **Secondary**: ReefSupport datasets for YOLO-based underwater detection
-- **Test data**: Uses CoralScapes test split (index 42 for reproducibility)
+Computes 6 distances (4 edges + 2 diagonals), filters via median ±8% tolerance, returns averaged PAE.
 
-## Development Notes
-- Black formatter configuration excludes `automated_underwater_area_estimation/data` directory
-- Test configuration includes slow test markers for computational intensive tests
-- Jupyter notebooks are supported for experimentation (`test.ipynb` demonstrates usage)
+### Data Download System
+
+`download_project_data.py` provides GCS bucket access:
+- Used for CoralScapes dataset and training data
+- Manual execution required (not automated in pipeline)
+
+### Testing Configuration
+
+From `pyproject.toml`:
+- Test discovery: `tests/test_*.py`
+- Default options: `-v --tb=short --strict-markers`
+- Markers: `slow` for computationally intensive tests
+- Warnings suppressed: DeprecationWarning, PendingDeprecationWarning
+
+### Label Studio Integration
+
+`label_studio/quadrant_mask_labelling.py`: Streamlit app for manual quadrant annotation
+- Uses Segment Anything Model (SAM) for interactive segmentation
+- Coordinates-based point selection for mask refinement
+
+## Data Preprocessing
+
+### Input Requirements
+
+- **Coral Segmentation**: RGB PIL images, any resolution (recommended >1024px on smaller side)
+- **Quadrant Detection**: Same images, internally resized to 800x600 for model input
+
+### Directory Structure
+
+```
+automated_underwater_area_estimation/
+├── segmentation_corals/          # Coral segmentation models
+│   ├── model.py                  # Abstract base class
+│   ├── class_mapping.py          # Class mapping validation
+│   ├── epfl/                     # EPFL Segformer implementation
+│   ├── reefsupport/              # YOLO-based detection
+│   └── coralscop/                # Alternative model implementations
+├── segmentation_quadrant/        # Quadrant detection
+│   ├── model.py                  # QuadrantSegmentationModel
+│   ├── train_model.py            # Training script
+│   ├── data_augmentation.py      # Augmentation pipeline
+│   └── segformer_best/           # Trained model weights (required)
+├── area_estimation/              # Pixel-to-area conversion
+│   ├── area_estimation.py        # Corner detection + PAE computation
+│   ├── evaluation.py             # Evaluator class for metrics
+│   └── ground_truth_generation.py
+├── preprocess_data/              # Dataset preprocessing
+│   ├── preprocess_IBF.py
+│   └── preprocess_reefsupport.py
+├── label_studio/                 # Manual annotation tools
+├── main.py                       # End-to-end pipeline CLI
+└── utils.py                      # Device detection, plotting utilities
+```
+
+## Python Environment
+
+- **Required**: Python 3.12 (not 3.13+)
+- **Lock file**: `poetry.lock` ensures reproducible builds
+- **Key dependencies**: torch, transformers, ultralytics, opencv, scikit-image, albumentationsx
+- **Dev dependencies**: black, pytest, jupyter, streamlit, segment-anything
+
+## Important Notes
+
+### Black Formatting Exclusions
+
+Automatically skips:
+- `automated_underwater_area_estimation/data/`
+- `automated_underwater_area_estimation/data_preprocessed/`
+
+### Model Weights Location
+
+- **Coral models**: Downloaded from HuggingFace on first use (EPFL-ECEO repos)
+- **Quadrant model**: Must exist at `segmentation_quadrant/segformer_best/` (trained locally)
+- **YOLO models**: Auto-download to `segmentation_corals/reefsupport/models/`
+
+### Evaluation Metrics
+
+When testing area estimation accuracy:
+- MAE (Mean Absolute Error in cm²)
+- RMSE (Root Mean Squared Error)
+- R² (coefficient of determination)
+- Relative error (fraction and percentage)
+- Bias (systematic over/under-estimation)
+
+See `Evaluator` class in `area_estimation/evaluation.py` for CSV-based batch evaluation.
