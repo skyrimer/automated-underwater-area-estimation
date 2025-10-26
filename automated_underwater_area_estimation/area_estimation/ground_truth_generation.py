@@ -29,13 +29,13 @@ NUMS_RE = re.compile(rf"{FLOAT}")
 def _read_text(path: Path) -> str:
     """
     Read text file with multiple encoding fallbacks.
-    
+
     Attempts to read the file using UTF-8-sig and latin-1 encodings,
     with a final fallback to UTF-8 with error ignoring.
-    
+
     Args:
         path: Path to text file to read
-        
+
     Returns:
         Content of the file as a string
     """
@@ -110,12 +110,12 @@ def parse_cpc(
 def find_image_for_stem(stem: str) -> Optional[Path]:
     """
     Find an image file matching the given stem (filename without extension).
-    
+
     Searches for image files with common extensions in a case-insensitive manner.
-    
+
     Args:
         stem: Filename without extension to search for
-        
+
     Returns:
         Path to the matching image file, or None if not found
     """
@@ -144,13 +144,13 @@ def find_image_for_stem(stem: str) -> Optional[Path]:
 def build_quadrant_df_and_overlays() -> pd.DataFrame:
     """
     Build a DataFrame with quadrant corner coordinates from CPC files.
-    
+
     Parses all CPC files in the configured directory, extracts ROI corner coordinates,
     and creates a DataFrame with image paths and scaled pixel coordinates.
-    
+
     Returns:
         DataFrame with columns for stem, image_path, cpc_path, and corner coordinates (c1x, c1y, c2x, c2y, c3x, c3y, c4x, c4y)
-        
+
     Raises:
         SystemExit: If required directories (images or cpcs) are missing
     """
@@ -239,20 +239,20 @@ def dist_px(
     x1: Union[float, np.ndarray, pd.Series],
     y1: Union[float, np.ndarray, pd.Series],
     x2: Union[float, np.ndarray, pd.Series],
-    y2: Union[float, np.ndarray, pd.Series]
+    y2: Union[float, np.ndarray, pd.Series],
 ) -> Union[float, np.ndarray, pd.Series]:
     """
     Euclidean distance in pixels between points (x1,y1) and (x2,y2).
-    
+
     Works with scalars, NumPy arrays, or pandas Series (vectorized).
     Uses np.hypot for numerical stability: sqrt(dx**2 + dy**2).
-    
+
     Args:
         x1: X-coordinate(s) of first point(s)
         y1: Y-coordinate(s) of first point(s)
         x2: X-coordinate(s) of second point(s)
         y2: Y-coordinate(s) of second point(s)
-        
+
     Returns:
         Euclidean distance(s) in pixels
     """

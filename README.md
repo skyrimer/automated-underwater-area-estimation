@@ -258,7 +258,7 @@ Train a custom Segformer model to detect the sampling quadrant in underwater ima
 Use the interactive Streamlit app with AquaSAM (Segment Anything Model fine-tuned on underwater data) to create quadrant masks.
 
 **Prerequisites:**
-- Download AquaSAM weights: Place `aquasam_weights.pth` in `automated_underwater_area_estimation/label_studio/`
+- Download AquaSAM weights from [their official GitHub](https://github.com/duooppa/AquaSAM?tab=readme-ov-file): Place `aquasam_weights.pth` in `automated_underwater_area_estimation/label_studio/`
 - Ensure images are in `data_preprocessed/IBF/images/`
 
 ```bash

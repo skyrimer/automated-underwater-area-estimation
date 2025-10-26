@@ -6,13 +6,13 @@ from pathlib import Path
 def parse_cpc_file(cpc_path: str) -> Optional[str]:
     """
     Parse CPC file and extract the referenced image filename.
-    
+
     Reads the first line of a CPC file and extracts the image filename
     from the second comma-separated field.
-    
+
     Args:
         cpc_path: Path to the CPC file to parse
-        
+
     Returns:
         Base filename of the referenced image, or None if parsing fails
     """

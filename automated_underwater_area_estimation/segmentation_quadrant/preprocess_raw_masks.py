@@ -21,13 +21,13 @@ IMG_EXTS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp"}
 def get_disk_footprint(radius: int) -> np.ndarray:
     """
     Get or create a circular disk structuring element.
-    
+
     Creates a disk-shaped binary structuring element for morphological operations.
     Note: Cache is per-process in multiprocessing.
-    
+
     Args:
         radius: Radius of the disk in pixels
-        
+
     Returns:
         Binary numpy array representing a disk structuring element
     """
@@ -37,10 +37,10 @@ def get_disk_footprint(radius: int) -> np.ndarray:
 def load_image(path: Path) -> np.ndarray:
     """
     Load image as RGB uint8 numpy array.
-    
+
     Args:
         path: Path to image file
-        
+
     Returns:
         RGB uint8 numpy array of shape (H, W, 3)
     """
@@ -51,16 +51,16 @@ def load_image(path: Path) -> np.ndarray:
 def load_mask_pt(path: Path, expected_shape: Tuple[int, int]) -> np.ndarray:
     """
     Load a binary mask saved as a .pt tensor file.
-    
+
     Handles torch tensors or dictionaries containing masks and validates the shape.
-    
+
     Args:
         path: Path to .pt file containing the mask
         expected_shape: Expected (height, width) tuple for validation
-        
+
     Returns:
         Boolean numpy array of shape (H, W)
-        
+
     Raises:
         ValueError: If mask shape doesn't match expected_shape
     """
@@ -92,14 +92,14 @@ def load_mask_pt(path: Path, expected_shape: Tuple[int, int]) -> np.ndarray:
 def keep_largest_component(mask: np.ndarray, connectivity: int = 2) -> np.ndarray:
     """
     Keep only the largest connected component in a boolean mask.
-    
+
     Uses connected component labeling to identify and retain only
     the largest connected region.
-    
+
     Args:
         mask: Boolean numpy array to process
         connectivity: Pixel connectivity (1=4-connected, 2=8-connected)
-        
+
     Returns:
         Boolean numpy array with only the largest component
     """

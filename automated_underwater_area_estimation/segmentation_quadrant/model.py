@@ -14,9 +14,9 @@ class QuadrantSegmentationModel:
     ):
         """
         Initialize the quadrant segmentation model.
-        
+
         Loads a SegFormer model fine-tuned for quadrant detection from a local checkpoint.
-        
+
         Args:
             device: Device to run the model on (e.g., "cuda" or "cpu"). If None, auto-detects.
             target_size: Optional (width, height) tuple to resize input images before processing.
@@ -39,13 +39,13 @@ class QuadrantSegmentationModel:
     def segment_image(self, image: Image.Image) -> np.ndarray:
         """
         Segment a single PIL image and return a 2D numpy array mask of class labels.
-        
+
         Processes the image through the model and returns a segmentation mask
         at the original image resolution.
-        
+
         Args:
             image: Input PIL Image to segment
-            
+
         Returns:
             2D numpy array (H_orig x W_orig) with integer class labels per pixel
         """
@@ -82,16 +82,16 @@ class QuadrantSegmentationModel:
     ) -> Image.Image:
         """
         Overlay the segmentation mask onto the original image.
-        
+
         Creates a visualization by blending the mask with the original image
         using the specified color and alpha blending.
-        
+
         Args:
             image: Original PIL RGB image
             mask: 2D numpy array of same size as image; non-zero pixels will be colored
             colour: RGB tuple for overlay color (default: red (255, 0, 0))
             alpha: Blending factor (0.0 = just image, 1.0 = full color overlay)
-            
+
         Returns:
             PIL Image with mask overlay applied
         """
@@ -122,17 +122,17 @@ class QuadrantSegmentationModel:
     ) -> tuple[np.ndarray, Image.Image]:
         """
         Convenience wrapper to load, segment, and visualize an image from a file path.
-        
+
         Loads an image, performs segmentation, creates an overlay visualization,
         and optionally saves both the mask and overlay to disk.
-        
+
         Args:
             image_path: Path to the input image file
             output_mask_path: Optional path to save the segmentation mask (as uint8 image)
             output_overlay_path: Optional path to save the overlay visualization
             colour: RGB tuple for overlay color (default: red)
             alpha: Blending factor for overlay (default: 0.5)
-            
+
         Returns:
             Tuple of (mask array, overlay PIL image)
         """

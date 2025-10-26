@@ -41,16 +41,16 @@ BORDER_VALUE_MASK = 0
 def load_mask_pt(path: str) -> torch.Tensor:
     """
     Load a binary mask saved as a .pt file.
-    
+
     Handles masks stored as torch tensors or dictionaries with a 'mask' key.
     Converts the loaded data to a boolean tensor of shape (H, W).
-    
+
     Args:
         path: Path to the .pt file containing the mask
-        
+
     Returns:
         Boolean torch.Tensor of shape (H, W)
-        
+
     Raises:
         ValueError: If the mask format is unsupported
     """
@@ -71,13 +71,13 @@ def load_mask_pt(path: str) -> torch.Tensor:
 def mask_to_cv2(mask: torch.Tensor) -> np.ndarray:
     """
     Convert torch boolean mask to OpenCV-compatible uint8 format.
-    
+
     Converts a torch boolean tensor to uint8 numpy array with shape (H, W, 1)
     for use with Albumentations. Values are {0, 255}.
-    
+
     Args:
         mask: Boolean torch.Tensor of shape (H, W)
-        
+
     Returns:
         Uint8 numpy array of shape (H, W, 1) with values in {0, 255}
     """
@@ -90,13 +90,13 @@ def mask_to_cv2(mask: torch.Tensor) -> np.ndarray:
 def cv2_to_mask(mask_u8: np.ndarray) -> torch.Tensor:
     """
     Convert OpenCV uint8 mask back to torch boolean tensor.
-    
+
     Converts a uint8 numpy array of shape (H, W) or (H, W, 1) to a
     boolean torch.Tensor of shape (H, W).
-    
+
     Args:
         mask_u8: Uint8 numpy array of shape (H, W) or (H, W, 1)
-        
+
     Returns:
         Boolean torch.Tensor of shape (H, W)
     """
@@ -111,10 +111,10 @@ def cv2_to_mask(mask_u8: np.ndarray) -> torch.Tensor:
 def make_rotation_only(angle: float) -> A.BasicTransform:
     """
     Create an Albumentations transform for exact rotation at a fixed angle.
-    
+
     Args:
         angle: Rotation angle in degrees
-        
+
     Returns:
         Albumentations Rotate transform configured for the specified angle
     """
@@ -226,7 +226,7 @@ def make_random_pipeline(
 def main() -> None:
     """
     Main function to perform data augmentation on images and masks.
-    
+
     Applies fixed rotations and random augmentations to create an augmented dataset
     suitable for training segmentation models. Reads images and masks from configured
     directories and saves augmented versions to output directories.

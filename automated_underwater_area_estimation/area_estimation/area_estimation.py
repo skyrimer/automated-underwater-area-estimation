@@ -83,16 +83,18 @@ def find_four_points(
 
 
 # Computing distance
-def compute_distances(m_or_path: Union[str, torch.Tensor, np.ndarray]) -> Dict[str, float]:
+def compute_distances(
+    m_or_path: Union[str, torch.Tensor, np.ndarray],
+) -> Dict[str, float]:
     """
     Compute Euclidean distances between four corner points of a quadrant mask.
-    
+
     Given a mask, finds the four corner points and returns distances (in pixels) between:
       TR–TL, TR–BR, TL–BL, BR–BL, TL–BR, TR–BL.
-    
+
     Args:
         m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
-        
+
     Returns:
         Dictionary mapping distance names to pixel values
     """
@@ -118,10 +120,10 @@ def plot_points_and_distances(
 ) -> None:
     """
     Visualize quadrant corner points and distance measurements on the mask.
-    
+
     Creates a plot showing the mask with corner points (TL, TR, BR, BL) annotated
     and lines connecting them with distance labels.
-    
+
     Args:
         m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
         points: Dictionary mapping corner labels ('TL', 'TR', 'BR', 'BL') to (y, x) coordinates
@@ -184,19 +186,19 @@ def plot_points_and_distances(
 def pix_to_cm_square(
     m_or_path: Union[str, torch.Tensor, np.ndarray],
     width_side: float = 53,
-    height_side: float = 53
+    height_side: float = 53,
 ) -> Dict[str, float]:
     """
     Convert pixel distances to squared cm/pixel ratios for area estimation.
-    
+
     Computes the ratio (real_size / pixel_size)^2 for each distance measurement,
     which can be used to estimate pixel area in cm².
-    
+
     Args:
         m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
         width_side: Real-world width of quadrant in cm
         height_side: Real-world height of quadrant in cm
-        
+
     Returns:
         Dictionary mapping distance names to squared cm/pixel ratios
     """
@@ -223,20 +225,20 @@ def estimate_area_using_quadrant(
     m_or_path: Union[str, torch.Tensor, np.ndarray],
     quadrant_width: float,
     quadrant_height: float,
-    pct: float = 0.08
+    pct: float = 0.08,
 ) -> float:
     """
     Estimate projected area per pixel (PAE) using quadrant measurements.
-    
+
     Computes multiple distance measurements from the quadrant corners,
     filters outliers, and returns the average area per pixel in cm².
-    
+
     Args:
         m_or_path: Path to .pt file, torch.Tensor, or numpy array representing the mask
         quadrant_width: Real-world width of quadrant in cm
         quadrant_height: Real-world height of quadrant in cm
         pct: Tolerance fraction for outlier filtering (e.g., 0.08 for 8%)
-        
+
     Returns:
         Average projected area estimate in cm² per pixel
     """

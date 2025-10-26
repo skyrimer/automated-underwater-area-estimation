@@ -22,16 +22,16 @@ EPS = 1e-6
 def load_mask_pt(path: str) -> torch.Tensor:
     """
     Load a binary mask from a .pt file and return as boolean tensor.
-    
+
     Handles masks stored as tensors or dictionaries with a 'mask' key.
     Converts multi-channel or 3D masks to 2D boolean tensors.
-    
+
     Args:
         path: Path to .pt file containing the mask
-        
+
     Returns:
         Boolean torch.Tensor of shape (H, W)
-        
+
     Raises:
         ValueError: If mask format is unsupported
     """
@@ -50,14 +50,14 @@ def load_mask_pt(path: str) -> torch.Tensor:
 def discover_pairs(img_dir: Path, mask_dir: Path) -> List[Tuple[Path, Path]]:
     """
     Discover matching image-mask pairs from directories.
-    
+
     Searches for images with common extensions and finds corresponding
     mask files with the same stem name.
-    
+
     Args:
         img_dir: Directory containing images
         mask_dir: Directory containing .pt mask files
-        
+
     Returns:
         Sorted list of (image_path, mask_path) tuples
     """
@@ -75,13 +75,13 @@ def discover_pairs(img_dir: Path, mask_dir: Path) -> List[Tuple[Path, Path]]:
 def _original_id(stem: str) -> str:
     """
     Extract the original image ID from an augmented filename.
-    
+
     Removes augmentation suffixes (e.g., _rot-15_aug02) to get the base
     image ID that all augmented variants share.
-    
+
     Args:
         stem: Filename stem (without extension)
-        
+
     Returns:
         Original image ID without augmentation suffixes
     """
@@ -93,12 +93,12 @@ def _original_id(stem: str) -> str:
 def _dataset_id(stem: str) -> str:
     """
     Extract the dataset identifier from a filename stem.
-    
+
     The dataset ID is the prefix before the first underscore.
-    
+
     Args:
         stem: Filename stem (without extension)
-        
+
     Returns:
         Dataset identifier string
     """
@@ -182,7 +182,7 @@ def split_by_dataset_and_group(
 def save_split(stems: List[str], path: Path) -> None:
     """
     Save a list of filename stems to a text file.
-    
+
     Args:
         stems: List of filename stems (one per line)
         path: Path to output text file

@@ -61,11 +61,11 @@ class EPFLModel(SegmentationModelBase):
     def resize_image(self, image: Image.Image, target_size: int = 1024) -> Image.Image:
         """
         Resize image maintaining aspect ratio with smaller dimension equal to target_size.
-        
+
         Args:
             image: Input PIL Image to resize
             target_size: Target size for the smaller dimension (default: 1024)
-            
+
         Returns:
             Resized PIL Image with smaller dimension equal to target_size
         """

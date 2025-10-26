@@ -146,11 +146,11 @@ class CoralSCOP(SegmentationModelBase):
     def resize_image(self, image: Image.Image, target_size: int = 1024) -> Image.Image:
         """
         Resize image maintaining aspect ratio with smaller dimension equal to target_size.
-        
+
         Args:
             image: Input PIL Image to resize
             target_size: Target size for the smaller dimension (default: 1024)
-            
+
         Returns:
             Resized PIL Image with smaller dimension equal to target_size
         """
@@ -362,7 +362,7 @@ class CoralSCOP(SegmentationModelBase):
     def get_detailed_masks(self, image: Image.Image) -> list:
         """
         Get detailed mask information including individual coral segments.
-        
+
         Generates segmentation masks using SAM and returns detailed information
         about each detected segment including bounding boxes, areas, and quality scores.
 

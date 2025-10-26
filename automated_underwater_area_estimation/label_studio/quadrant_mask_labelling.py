@@ -52,14 +52,14 @@ def load_model(
 ) -> Tuple[Any, Any, str]:
     """
     Load AquaSAM model with caching.
-    
+
     Initializes the Segment Anything Model (SAM) with AquaSAM weights
     fine-tuned for underwater imagery. Uses Streamlit caching for efficiency.
-    
+
     Args:
         checkpoint_path: Path to AquaSAM checkpoint file
         sam_variant: SAM model variant (e.g., 'vit_b')
-        
+
     Returns:
         Tuple of (sam_model, predictor, device_name)
     """
@@ -137,10 +137,10 @@ def upscale_mask_to_original(mask: torch.Tensor, target_size: tuple) -> torch.Te
 def get_unlabeled_images() -> Tuple[List[Path], set]:
     """
     Get lists of unlabeled and labeled images.
-    
+
     Scans the images directory and checks which images already have
     corresponding mask files in the masks directory.
-    
+
     Returns:
         Tuple of (unlabeled_images_list, labeled_images_set)
     """
@@ -165,16 +165,16 @@ def segment_object_from_clicks(
 ) -> Optional[torch.Tensor]:
     """
     Segment an object from an image using AquaSAM with multiple click points.
-    
+
     Uses the Segment Anything Model to generate a segmentation mask based on
     user-provided positive and negative click points.
-    
+
     Args:
         image: PIL Image to segment
         clicks: List of (x, y, label) tuples where label is 1 (positive) or 0 (negative)
         predictor: SAM predictor instance
         device: Device name (e.g., 'cuda', 'cpu')
-        
+
     Returns:
         Boolean tensor mask of shape (H, W), or None if no clicks provided
     """
