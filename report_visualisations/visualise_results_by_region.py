@@ -17,7 +17,7 @@ def load_detailed_results(base_path):
 
     for file_path in detailed_files:
         print(f"Processing: {file_path}")
-        if "ReefSupport" in file_path.__str__():
+        if "ReefSupport" in file_path.__str__() or "EPFL_b2" in file_path.__str__():
             continue
         try:
             with open(file_path, "r") as f:
@@ -120,7 +120,7 @@ for metric in metric_columns:
     mean_col = f"{metric}_mean"
     std_col = f"{metric}_std"
 
-    plt.figure(figsize=(20, 6))
+    plt.figure(figsize=(15, 6))
 
     # Prepare data for plotting
     regions = []

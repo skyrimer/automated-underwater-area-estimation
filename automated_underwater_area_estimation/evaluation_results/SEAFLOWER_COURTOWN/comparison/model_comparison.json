@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "SEAFLOWER_COURTOWN",
+    "dice_mean": 0.5242434898377012,
+    "dice_std": 0.30969067398973626,
+    "iou_mean": 0.41383332392278044,
+    "iou_std": 0.28308838400731795,
+    "precision_mean": 0.5906332583752133,
+    "precision_std": 0.326399133772516,
+    "recall_mean": 0.5936733844638559,
+    "recall_std": 0.3023883291135539,
+    "pixel_accuracy_mean": 0.8586716407685854,
+    "pixel_accuracy_std": 0.16130509307987476
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "SEAFLOWER_COURTOWN",
+    "dice_mean": 0.453798237765893,
+    "dice_std": 0.32088030153832275,
+    "iou_mean": 0.3510924761433267,
+    "iou_std": 0.2813081195175676,
+    "precision_mean": 0.6331048427599457,
+    "precision_std": 0.35015203327798533,
+    "recall_mean": 0.4237630434047654,
+    "recall_std": 0.3071225150616254,
+    "pixel_accuracy_mean": 0.8862621920237402,
+    "pixel_accuracy_std": 0.10803341937521684
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "SEAFLOWER_COURTOWN",
+    "dice_mean": 0.09481553899975201,
+    "dice_std": 0.1743146291612236,
+    "iou_mean": 0.06199238848743793,
+    "iou_std": 0.13649018457181097,
+    "precision_mean": 0.9243206744297917,
+    "precision_std": 0.2167626943975572,
+    "recall_mean": 0.06340375016507499,
+    "recall_std": 0.139496194237601,
+    "pixel_accuracy_mean": 0.8331166623291633,
+    "pixel_accuracy_std": 0.1636831899271586
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "SEAFLOWER_COURTOWN",
+    "dice_mean": 0.5445975454443996,
+    "dice_std": 0.3063803755541495,
+    "iou_mean": 0.432178643668148,
+    "iou_std": 0.2791806032743551,
+    "precision_mean": 0.6559154775445021,
+    "precision_std": 0.33668129508338285,
+    "recall_mean": 0.523099845259643,
+    "recall_std": 0.29685895334914353,
+    "pixel_accuracy_mean": 0.9083656755225787,
+    "pixel_accuracy_std": 0.07988263442779302
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "SEAFLOWER_COURTOWN",
+    "dice_mean": 0.5724637769638361,
+    "dice_std": 0.3057909480143129,
+    "iou_mean": 0.4624055995186981,
+    "iou_std": 0.2912623694185403,
+    "precision_mean": 0.6780883245291336,
+    "precision_std": 0.3180086169984861,
+    "recall_mean": 0.5672209660506651,
+    "recall_std": 0.30609301295162356,
+    "pixel_accuracy_mean": 0.9121104734814514,
+    "pixel_accuracy_std": 0.09037541271164545
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "SEAVIEW_IDN_PHL",
+    "dice_mean": 0.6027430364820614,
+    "dice_std": 0.26713115318440084,
+    "iou_mean": 0.4787186456137099,
+    "iou_std": 0.2513912066495197,
+    "precision_mean": 0.7301054191941454,
+    "precision_std": 0.24341891027032408,
+    "recall_mean": 0.5924971508105102,
+    "recall_std": 0.2785672600813569,
+    "pixel_accuracy_mean": 0.7687670954547087,
+    "pixel_accuracy_std": 0.1783087458804233
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "SEAVIEW_IDN_PHL",
+    "dice_mean": 0.36759423909102384,
+    "dice_std": 0.24610435101355316,
+    "iou_mean": 0.25514510932612133,
+    "iou_std": 0.20161520596100382,
+    "precision_mean": 0.6932735428766955,
+    "precision_std": 0.2840148324604457,
+    "recall_mean": 0.29948504535340953,
+    "recall_std": 0.22944591036856615,
+    "pixel_accuracy_mean": 0.6690682494001615,
+    "pixel_accuracy_std": 0.22491359023803745
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "SEAVIEW_IDN_PHL",
+    "dice_mean": 0.16022837764821174,
+    "dice_std": 0.22311141533329149,
+    "iou_mean": 0.10904363367511372,
+    "iou_std": 0.18477753964983368,
+    "precision_mean": 0.8482259949600376,
+    "precision_std": 0.27761223663122303,
+    "recall_mean": 0.11265335245704365,
+    "recall_std": 0.18983025358756483,
+    "pixel_accuracy_mean": 0.6244273935914312,
+    "pixel_accuracy_std": 0.2576131403036375
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "SEAVIEW_IDN_PHL",
+    "dice_mean": 0.7154309944527761,
+    "dice_std": 0.23860595900148968,
+    "iou_mean": 0.6011941222211195,
+    "iou_std": 0.24265070216062637,
+    "precision_mean": 0.7127672161044849,
+    "precision_std": 0.23792290852252246,
+    "recall_mean": 0.7960801386702716,
+    "recall_std": 0.2349358743154923,
+    "pixel_accuracy_mean": 0.8183318370945208,
+    "pixel_accuracy_std": 0.15245417744076822
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "SEAVIEW_IDN_PHL",
+    "dice_mean": 0.7390468905108639,
+    "dice_std": 0.2350595683116243,
+    "iou_mean": 0.6300267872211062,
+    "iou_std": 0.2402469189789499,
+    "precision_mean": 0.7230312758159791,
+    "precision_std": 0.22192519507431713,
+    "recall_mean": 0.8326199812751541,
+    "recall_std": 0.22466227950251128,
+    "pixel_accuracy_mean": 0.8380313519020705,
+    "pixel_accuracy_std": 0.1325729170448685
+  }
+]

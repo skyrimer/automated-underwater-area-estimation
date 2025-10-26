@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "TETES_PROVIDENCIA",
+    "dice_mean": 0.5250914555220377,
+    "dice_std": 0.22896504059403108,
+    "iou_mean": 0.3906827820553666,
+    "iou_std": 0.22529865890339412,
+    "precision_mean": 0.473714691365049,
+    "precision_std": 0.2976223160569847,
+    "recall_mean": 0.7784524826776413,
+    "recall_std": 0.12123319764475517,
+    "pixel_accuracy_mean": 0.6669458213306608,
+    "pixel_accuracy_std": 0.2230556869135584
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "TETES_PROVIDENCIA",
+    "dice_mean": 0.4898552415914656,
+    "dice_std": 0.2002175583527143,
+    "iou_mean": 0.34751390333930476,
+    "iou_std": 0.17625232031723548,
+    "precision_mean": 0.8631884100891295,
+    "precision_std": 0.10896728260512041,
+    "recall_mean": 0.36845946978511557,
+    "recall_std": 0.1894559324282685,
+    "pixel_accuracy_mean": 0.868476242678506,
+    "pixel_accuracy_std": 0.05837173334985264
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "TETES_PROVIDENCIA",
+    "dice_mean": 0.09867590324339716,
+    "dice_std": 0.10535413158289236,
+    "iou_mean": 0.05549320653531827,
+    "iou_std": 0.06518181561983294,
+    "precision_mean": 0.9229761265577552,
+    "precision_std": 0.20752691189033853,
+    "recall_mean": 0.05573273880325953,
+    "recall_std": 0.06553420762473162,
+    "pixel_accuracy_mean": 0.8184595919790723,
+    "pixel_accuracy_std": 0.06595428343921259
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "TETES_PROVIDENCIA",
+    "dice_mean": 0.434188920419131,
+    "dice_std": 0.19051303110945245,
+    "iou_mean": 0.2970959027608236,
+    "iou_std": 0.16457891168585592,
+    "precision_mean": 0.9345202917144412,
+    "precision_std": 0.049477198542662734,
+    "recall_mean": 0.30484133859475454,
+    "recall_std": 0.17196839282374682,
+    "pixel_accuracy_mean": 0.8662343842642648,
+    "pixel_accuracy_std": 0.049352723048606634
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "TETES_PROVIDENCIA",
+    "dice_mean": 0.5417379250838643,
+    "dice_std": 0.19396798494162168,
+    "iou_mean": 0.3961214702399004,
+    "iou_std": 0.18697023809089638,
+    "precision_mean": 0.8347252005622501,
+    "precision_std": 0.14110710267351778,
+    "recall_mean": 0.42684748414016904,
+    "recall_std": 0.20267307496784892,
+    "pixel_accuracy_mean": 0.8771816083363124,
+    "pixel_accuracy_std": 0.05662032320205508
+  }
+]

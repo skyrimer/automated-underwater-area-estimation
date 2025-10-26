@@ -210,7 +210,7 @@ models/
 .idea
 data/
 data_preprocessed/
-evaluation_results/
+#evaluation_results/
 aquasam_weights.pth
 checkpoints/
 segformer_quad_preaug/

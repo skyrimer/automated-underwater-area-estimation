@@ -117,6 +117,8 @@ python --version  # or python3 --version
 
 You should see `Python 3.12.x`.
 
+Ideally, you should use a virtual environment with cleanly installed python version to isolate your project dependencies. Though, this is not required, since following set-up with poetry will resolve all dependency collisions.
+
 ---
 
 ## Installation

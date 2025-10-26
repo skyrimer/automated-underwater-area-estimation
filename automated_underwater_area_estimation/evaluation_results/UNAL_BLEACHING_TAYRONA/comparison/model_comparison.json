@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "UNAL_BLEACHING_TAYRONA",
+    "dice_mean": 0.45268164544801887,
+    "dice_std": 0.31447701529172417,
+    "iou_mean": 0.3483440277279316,
+    "iou_std": 0.2783571306314175,
+    "precision_mean": 0.6076641893230622,
+    "precision_std": 0.34928141437432075,
+    "recall_mean": 0.5473448381307673,
+    "recall_std": 0.3394443942581322,
+    "pixel_accuracy_mean": 0.6587949831599206,
+    "pixel_accuracy_std": 0.26089702558315114
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "UNAL_BLEACHING_TAYRONA",
+    "dice_mean": 0.305025792393054,
+    "dice_std": 0.30181843171535666,
+    "iou_mean": 0.2233044165980404,
+    "iou_std": 0.2462880978349261,
+    "precision_mean": 0.5672058882205563,
+    "precision_std": 0.38357693287168093,
+    "recall_mean": 0.29273632130103494,
+    "recall_std": 0.3025083277751449,
+    "pixel_accuracy_mean": 0.7048716865094962,
+    "pixel_accuracy_std": 0.21369057111631903
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "UNAL_BLEACHING_TAYRONA",
+    "dice_mean": 0.14496139760694232,
+    "dice_std": 0.2568905533030676,
+    "iou_mean": 0.10869021497381914,
+    "iou_std": 0.22430555699908833,
+    "precision_mean": 0.8208856494334087,
+    "precision_std": 0.338668459820616,
+    "recall_mean": 0.12535484651341983,
+    "recall_std": 0.25199312432592025,
+    "pixel_accuracy_mean": 0.67440282397176,
+    "pixel_accuracy_std": 0.24343708210363868
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "UNAL_BLEACHING_TAYRONA",
+    "dice_mean": 0.505506706496517,
+    "dice_std": 0.32486681658261524,
+    "iou_mean": 0.4024556568800916,
+    "iou_std": 0.2995372563115794,
+    "precision_mean": 0.7835858465645162,
+    "precision_std": 0.32245276839402226,
+    "recall_mean": 0.47234821483067463,
+    "recall_std": 0.3198826962093528,
+    "pixel_accuracy_mean": 0.7912856506291313,
+    "pixel_accuracy_std": 0.18318893472681702
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "UNAL_BLEACHING_TAYRONA",
+    "dice_mean": 0.5000613233318042,
+    "dice_std": 0.32547618133860345,
+    "iou_mean": 0.39756413574560706,
+    "iou_std": 0.30026790067439074,
+    "precision_mean": 0.8295972782080921,
+    "precision_std": 0.297206098998984,
+    "recall_mean": 0.45236085072312576,
+    "recall_std": 0.32140290172545866,
+    "pixel_accuracy_mean": 0.7943092383512248,
+    "pixel_accuracy_std": 0.1845970324890355
+  }
+]

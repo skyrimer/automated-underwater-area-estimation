@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "SEAVIEW_PAC_USA",
+    "dice_mean": 0.4649994130618067,
+    "dice_std": 0.24610617248924524,
+    "iou_mean": 0.3370027782086226,
+    "iou_std": 0.21612007432626132,
+    "precision_mean": 0.8911989837761715,
+    "precision_std": 0.2173741127184665,
+    "recall_mean": 0.3629125136429867,
+    "recall_std": 0.22898619873233533,
+    "pixel_accuracy_mean": 0.5566298219368596,
+    "pixel_accuracy_std": 0.27446458401275
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "SEAVIEW_PAC_USA",
+    "dice_mean": 0.21822474160073282,
+    "dice_std": 0.18239986112181497,
+    "iou_mean": 0.13622572392073934,
+    "iou_std": 0.13641742738066207,
+    "precision_mean": 0.9352223512817187,
+    "precision_std": 0.16432551154605013,
+    "recall_mean": 0.13997933995363693,
+    "recall_std": 0.14011581770175768,
+    "pixel_accuracy_mean": 0.41396361726923375,
+    "pixel_accuracy_std": 0.336930136071331
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "SEAVIEW_PAC_USA",
+    "dice_mean": 0.09224820985522836,
+    "dice_std": 0.15480886156100948,
+    "iou_mean": 0.05769212714545934,
+    "iou_std": 0.11753692059611975,
+    "precision_mean": 0.9565249404356373,
+    "precision_std": 0.14745361212011987,
+    "recall_mean": 0.059067334402324624,
+    "recall_std": 0.12160634402550208,
+    "pixel_accuracy_mean": 0.36463247863345893,
+    "pixel_accuracy_std": 0.35957775610308007
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "SEAVIEW_PAC_USA",
+    "dice_mean": 0.664542699518535,
+    "dice_std": 0.23121971346213033,
+    "iou_mean": 0.5382676197740865,
+    "iou_std": 0.23896686158862626,
+    "precision_mean": 0.8976587738276044,
+    "precision_std": 0.19725254010720675,
+    "recall_mean": 0.5706200316458702,
+    "recall_std": 0.23359324984929966,
+    "pixel_accuracy_mean": 0.7346391926473518,
+    "pixel_accuracy_std": 0.17827186126710293
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "SEAVIEW_PAC_USA",
+    "dice_mean": 0.7200516355592974,
+    "dice_std": 0.24899524474413579,
+    "iou_mean": 0.6148258328301826,
+    "iou_std": 0.2736928242406187,
+    "precision_mean": 0.910858414791306,
+    "precision_std": 0.18182172569799904,
+    "recall_mean": 0.6446253501075759,
+    "recall_std": 0.26876914982986755,
+    "pixel_accuracy_mean": 0.8047320719187565,
+    "pixel_accuracy_std": 0.16900085450563537
+  }
+]

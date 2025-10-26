@@ -1,0 +1,72 @@
+[
+  {
+    "model": "ReefSupport_yolov8_sm_latest",
+    "dataset": "SEAFLOWER_BOLIVAR",
+    "dice_mean": 0.639141703624922,
+    "dice_std": 0.2735789976914614,
+    "iou_mean": 0.5251145781403994,
+    "iou_std": 0.27968959188597436,
+    "precision_mean": 0.623342712662975,
+    "precision_std": 0.2967391405478397,
+    "recall_mean": 0.7848973138917814,
+    "recall_std": 0.23998090501100267,
+    "pixel_accuracy_mean": 0.7991233376589247,
+    "pixel_accuracy_std": 0.18783640558461542
+  },
+  {
+    "model": "ReefSupport_yolov8_xlarge_latest",
+    "dataset": "SEAFLOWER_BOLIVAR",
+    "dice_mean": 0.617834369601664,
+    "dice_std": 0.293870499815169,
+    "iou_mean": 0.5068067523944104,
+    "iou_std": 0.28568188969782315,
+    "precision_mean": 0.7544510699416219,
+    "precision_std": 0.2742275796172728,
+    "recall_mean": 0.5919183664369398,
+    "recall_std": 0.30440149085085827,
+    "pixel_accuracy_mean": 0.8583480750884467,
+    "pixel_accuracy_std": 0.1296612114292768
+  },
+  {
+    "model": "CoralSCOP",
+    "dataset": "SEAFLOWER_BOLIVAR",
+    "dice_mean": 0.4103551844690732,
+    "dice_std": 0.3844734482451912,
+    "iou_mean": 0.3457975457821364,
+    "iou_std": 0.36751609376779604,
+    "precision_mean": 0.949899237028093,
+    "precision_std": 0.15684265022690966,
+    "recall_mean": 0.3514089600666123,
+    "recall_std": 0.3723701827223089,
+    "pixel_accuracy_mean": 0.8247894198308147,
+    "pixel_accuracy_std": 0.1646291227138382
+  },
+  {
+    "model": "EPFL_b2",
+    "dataset": "SEAFLOWER_BOLIVAR",
+    "dice_mean": 0.7503833666016043,
+    "dice_std": 0.2321654373264462,
+    "iou_mean": 0.6452388749985571,
+    "iou_std": 0.24519443938695193,
+    "precision_mean": 0.7627520423412828,
+    "precision_std": 0.20946017526178587,
+    "recall_mean": 0.8084519397979886,
+    "recall_std": 0.245187419864204,
+    "pixel_accuracy_mean": 0.8975709384776712,
+    "pixel_accuracy_std": 0.09777048229375024
+  },
+  {
+    "model": "EPFL_b5",
+    "dataset": "SEAFLOWER_BOLIVAR",
+    "dice_mean": 0.7438333350956845,
+    "dice_std": 0.2271790725638821,
+    "iou_mean": 0.6367503422145872,
+    "iou_std": 0.25077501444617706,
+    "precision_mean": 0.705153309217678,
+    "precision_std": 0.237249191266475,
+    "recall_mean": 0.85715041211068,
+    "recall_std": 0.2119706467238709,
+    "pixel_accuracy_mean": 0.888371091305725,
+    "pixel_accuracy_std": 0.09611342532736565
+  }
+]
